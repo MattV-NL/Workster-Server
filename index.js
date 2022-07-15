@@ -26,8 +26,15 @@ const options = {
   method: 'GET',
 };
 
+// working on getting position from client
+
+app.post('/client', (req, res) => {
+  console.log(req.body);
+});
+
+// end of new
+
 app.get('/api', (req, res) => {
-  console.log('test');
   let data = '';
   const request = https.request(options, (response) => {
     console.log(`statusCode: ${res.statusCode}`);
