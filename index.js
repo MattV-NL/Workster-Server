@@ -28,10 +28,26 @@ const options = {
 
 // working on getting position from client
 
-app.post('/client', (req, res) => {
-  console.log(req.body);
+const getOptions = {
+  hostname: 'localhost:3000',
+  port: 443,
+  path: '/api',
+  method: 'GET',
+};
+
+const request = https.request(getOptions, (response) => {
+  console.log(`statusCode: ${response.statusCode}`);
+
+  response.on('data', (d) => {
+    process.stdout.write(d);
+  });
 });
 
+request.on('error', (error) => {
+  console.log(error);
+});
+
+request.end();
 // end of new
 
 app.get('/api', (req, res) => {
