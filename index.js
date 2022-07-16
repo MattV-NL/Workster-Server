@@ -29,25 +29,32 @@ const options = {
 // working on getting position from client
 
 const getOptions = {
-  hostname: 'localhost:3000',
   port: 443,
-  path: '/api',
   method: 'GET',
+  path: '/api',
 };
 
-const request = https.request(getOptions, (response) => {
-  console.log(`statusCode: ${response.statusCode}`);
+app.get('/api', (req, res) => {
+  let info = '';
+  const request = https.request(getOptions, (response) => {
+    console.log(`statusCode: ${res.statusCode}`);
 
-  response.on('data', (d) => {
-    process.stdout.write(d);
+    response.on('info', (i) => {
+      process.stdout.write(i);
+      info = info + i;
+    });
   });
-});
 
-request.on('error', (error) => {
-  console.log(error);
-});
+  request.on('end', () => {
+    res.status(200).json(JSON.parse(info));
+  });
 
-request.end();
+  request.on('error', (err) => {
+    console.error(err);
+  });
+
+  request.end();
+});
 // end of new
 
 app.get('/api', (req, res) => {
