@@ -1,11 +1,12 @@
 const express = require('express');
 const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 8000;
 const https = require('https');
 const cors = require('cors');
+require('dotenv').config();
 
 const corsOptions = {
-  origin: 'http://localhost:8080',
+  origin: 'http://localhost:8000',
 };
 
 app.use(cors(corsOptions));
@@ -15,7 +16,7 @@ app.listen(PORT, () => {
 
 let lang = 'en';
 let units = 'metric';
-let key = 'c4aa91c492141719621c2f09ce2559a3';
+const key = process.env.API_KEY;
 const lat = 47.63;
 const lon = -52.64;
 
@@ -27,7 +28,6 @@ const options = {
 };
 
 // working on getting position from client
-
 const getOptions = {
   port: 443,
   method: 'GET',
