@@ -5,11 +5,12 @@ const https = require('https');
 const cors = require('cors');
 require('dotenv').config();
 
-const corsOptions = {
-  origin: 'http://localhost:8000',
-};
+// const corsOptions = {
+//   origin: `http://localhost:8000/*`,
+// };
 
-app.use(cors(corsOptions));
+app.use(cors());
+app.use(express.json());
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
 });
@@ -28,36 +29,16 @@ const options = {
 };
 
 // working on getting position from client
-const getOptions = {
-  port: 443,
-  method: 'GET',
-  path: '/api',
-};
-
-app.get('/api', (req, res) => {
-  let info = '';
-  const request = https.request(getOptions, (response) => {
-    console.log(`statusCode: ${res.statusCode}`);
-
-    response.on('info', (i) => {
-      process.stdout.write(i);
-      info = info + i;
-    });
+app.post('/api/position', (req, res) => {
+  console.log('i got a request');
+  console.log(req.body);
+  res.json({
+    status: 'success',
   });
-
-  request.on('end', () => {
-    res.status(200).json(JSON.parse(info));
-  });
-
-  request.on('error', (err) => {
-    console.error(err);
-  });
-
-  request.end();
 });
 // end of new
 
-app.get('/api', (req, res) => {
+app.get('/api/weather', (req, res) => {
   let data = '';
   const request = https.request(options, (response) => {
     console.log(`statusCode: ${res.statusCode}`);
