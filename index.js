@@ -14,7 +14,7 @@ const client = new Client({
   host: 'localhost',
   user: 'postgres',
   port: 5432,
-  password: 'tinker',
+  password: process.env.POSTGRES_PW,
   database: 'wwadb',
 });
 
