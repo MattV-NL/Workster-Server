@@ -4,10 +4,30 @@ const PORT = process.env.PORT || 8000;
 const axios = require('axios');
 const cors = require('cors');
 require('dotenv').config();
+const { Client } = require('pg');
 
 const corsOptions = {
   origin: 'http://localhost:3000',
 };
+
+const client = new Client({
+  host: 'localhost',
+  user: 'postgres',
+  port: 5432,
+  password: 'tinker',
+  database: 'wwadb',
+});
+
+client.connect();
+
+client.query(`Select * from users`, (err, res) => {
+  if (!err) {
+    console.log(res);
+  } else {
+    console.error(err);
+  }
+  client.end;
+});
 
 app.use(cors(corsOptions));
 app.use(express.json());
