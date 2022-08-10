@@ -70,7 +70,7 @@ app.post('/login', (req, res) => {
   const last_login = new Date.now();
 
   db.query(
-    `INSERT INTO users (last_login) VALUES ($1) SELECT * FROM users WHERE username = $2 AND password = $3`,
+    `UPDATE users SET (last_login) = ($1), SELECT * FROM users WHERE username = $2 AND password = $3`,
     [last_login, username, password],
     (err, result) => {
       if (err) {
