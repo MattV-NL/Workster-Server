@@ -51,10 +51,12 @@ app.get('/api/weather/:latlon', async (req, resp) => {
 app.post('/register', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
+  const email = req.body.email;
+  const created_on = new Date.now();
 
   db.query(
-    `INSERT INTO users (username, password) VALUES ($1, $2)`,
-    [username, password],
+    `INSERT INTO users (username, email, password) VALUES ($1, $2, $3, $4)`,
+    [username, email, password, created_on],
     (err, res) => {
       console.log(err);
     }
@@ -65,10 +67,11 @@ app.post('/register', (req, res) => {
 app.post('/login', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
+  const last_login = new Date.now();
 
   db.query(
-    `SELECT * FROM users WHERE username = $1 AND password = $2`,
-    [username, password],
+    `INSERT INTO users (last_login) VALUES ($1) SELECT * FROM users WHERE username = $2 AND password = $3`,
+    [last_login, username, password],
     (err, result) => {
       if (err) {
         res.send(err);
