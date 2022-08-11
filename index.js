@@ -5,6 +5,9 @@ const axios = require('axios');
 const cors = require('cors');
 require('dotenv').config();
 const { Client } = require('pg');
+const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
+dayjs.extend(utc);
 
 const corsOptions = {
   origin: 'http://localhost:3000',
@@ -17,8 +20,6 @@ const db = new Client({
   password: process.env.POSTGRES_PW,
   database: 'wwadb',
 });
-
-db.connect();
 
 app.use(cors(corsOptions));
 app.use(express.json());
@@ -52,36 +53,36 @@ app.post('/register', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
   const email = req.body.email;
-  const created_on = new Date.now();
-
+  const timestamp = dayjs.utc().format('YYYY-MM-DD HH:mm:ss').toString();
+  db.connect();
   db.query(
-    `INSERT INTO users (username, email, password) VALUES ($1, $2, $3, $4)`,
-    [username, email, password, created_on],
+    `INSERT INTO users (username, email, password, created_on) VALUES ($1, $2, $3, $4)`,
+    [username, email, password, timestamp],
     (err, res) => {
       console.log(err);
     }
   );
-  db.end;
+  res.send({ message: 'registration successful' });
+  db.end();
 });
 
 app.post('/login', (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
-  const last_login = new Date.now();
-
+  const timestamp = dayjs.utc().format('YYYY-MM-DD HH:mm:ss').toString();
+  db.connect();
   db.query(
-    `UPDATE users SET (last_login) = ($1), SELECT * FROM users WHERE username = $2 AND password = $3`,
-    [last_login, username, password],
+    'UPDATE users SET last_login = $1 WHERE username = $2 AND password = $3;',
+    [timestamp, username, password],
     (err, result) => {
       if (err) {
         res.send(err);
-      }
-      if (result.rows.length > 0) {
-        res.send(result.rows[0]);
+      } else if (result.rows === 1) {
+        res.send(result);
       } else {
         res.send({ message: 'Wrong username and password combination' });
       }
+      db.end();
     }
   );
-  db.end;
 });
