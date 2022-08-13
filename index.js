@@ -79,38 +79,31 @@ app.post('/login', async (req, res) => {
   const password = req.body.password;
   const timestamp = dayjs.utc().format('YYYY-MM-DD HH:mm:ss').toString();
 
-  const getPassword = await pool.query(
-    'SELECT username, password FROM users',
-    (err, result) => {
-      const user = result.rows.find((user) => user.username === username);
-      if (err) {
-        res.send(err);
-      }
-      try {
-        const check = bcrypt.compare(user.password, password);
-        if (check) {
-          res.send({ message: 'login successful' });
-        } else {
-          res.send('wrong username and password combination');
-        }
-      } catch {
-        res.status(500).send();
-      }
+  pool.query('SELECT username, password FROM users', (err, result) => {
+    const user = result.rows.find((user) => user.username === username);
+    if (err) {
+      res.send(err);
     }
-  );
-
-  const results = await pool.query(
-    'UPDATE users SET last_login = $1 WHERE username = $2 AND password = $3;',
-    [timestamp, username, password],
-    (err, result) => {
-      if (err) {
-        res.send(err);
-      } else if (result.rowCount === 1) {
+    try {
+      const check = bcrypt.compare(user.password, password);
+      if (check) {
         res.send({ message: 'login successful' });
       } else {
-        res.send({
-          message: 'Wrong username and password combination',
-        });
+        res.send('wrong username and password combination');
+      }
+    } catch {
+      res.status(500).send();
+    }
+  });
+
+  pool.query(
+    'UPDATE users SET last_login = $1 WHERE username = $2;',
+    [timestamp, username],
+    (err, result) => {
+      if (err) {
+        res.send(err);
+      } else {
+        console.log('logged last_login');
       }
     }
   );
