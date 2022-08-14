@@ -61,11 +61,13 @@ app.post('/register', async (req, res) => {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const results = await pool.query(
+    pool.query(
       `INSERT INTO users (username, email, password, created_on) VALUES ($1, $2, $3, $4)`,
       [username, email, hashedPassword, timestamp],
       (err, result) => {
-        console.log(err);
+        if (err) {
+          console.log(err);
+        }
       }
     );
     res.send({ message: 'registration successful' });
@@ -79,31 +81,33 @@ app.post('/login', async (req, res) => {
   const password = req.body.password;
   const timestamp = dayjs.utc().format('YYYY-MM-DD HH:mm:ss').toString();
 
-  pool.query('SELECT username, password FROM users', (err, result) => {
+  pool.query('SELECT username, password FROM users', async (err, result) => {
     const user = result.rows.find((user) => user.username === username);
     if (err) {
-      res.send(err);
+      console.log(err);
     }
     try {
-      const check = bcrypt.compare(user.password, password);
-      if (check) {
-        res.send({ message: 'login successful' });
+      const checkPassword = await bcrypt.compare(password, user.password);
+      if (checkPassword) {
+        res.send({ message: 'login successful', status: true });
       } else {
-        res.send('wrong username and password combination');
+        res.send({
+          massage: 'wrong username and password combination',
+          status: false,
+        });
       }
     } catch {
       res.status(500).send();
     }
   });
-
   pool.query(
-    'UPDATE users SET last_login = $1 WHERE username = $2;',
+    'UPDATE users SET last_login_attempt = $1 WHERE username = $2',
     [timestamp, username],
     (err, result) => {
       if (err) {
         res.send(err);
       } else {
-        console.log('logged last_login');
+        res.send({ message: `logged last_login_attempt for ${username}` });
       }
     }
   );
