@@ -9,6 +9,7 @@ const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
 const corsOptions = {
   origin: 'http://localhost:3000',
@@ -89,26 +90,60 @@ app.post('/login', async (req, res) => {
     try {
       const checkPassword = await bcrypt.compare(password, user.password);
       if (checkPassword) {
-        res.send({ message: 'login successful', status: true });
+        const id = user.user_id;
+        const token = jwt.sign({ id }, process.env.ACCESS_TOKEN_SECRET, {
+          expiresIn: 300, //five minutes
+        });
+
+        res.json({
+          message: 'login successful',
+          auth: true,
+          last_login_attempt: timestamp,
+          token: token,
+        });
       } else {
         res.send({
           massage: 'wrong username and password combination',
-          status: false,
+          auth: false,
+          last_login_attempt: timestamp,
         });
       }
     } catch {
+      console.log(err);
       res.status(500).send();
     }
   });
   pool.query(
     'UPDATE users SET last_login_attempt = $1 WHERE username = $2',
     [timestamp, username],
-    (err, result) => {
+    async (err, result) => {
       if (err) {
         res.send(err);
       } else {
-        res.send({ message: `logged last_login_attempt for ${username}` });
+        console.log({
+          message: `logged last_login_attempt for ${username}`,
+        });
       }
     }
   );
+});
+
+const verifyJWT = (req, res, next) => {
+  const token = req.headers['x-access-token'];
+  if (!token) {
+    res.send({ message: 'no authorization token found' });
+  } else {
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+      if (err) {
+        res.send({ auth: false, message: 'failed to authenticate' });
+      } else {
+        req.userId = decoded.id;
+        next();
+      }
+    });
+  }
+};
+
+app.get('/authCheck', verifyJWT, (req, res) => {
+  res.send({ auth: true, message: 'authentication successful' });
 });
