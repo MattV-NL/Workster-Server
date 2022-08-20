@@ -36,15 +36,12 @@ const lang = 'en';
 const units = 'metric';
 const key = process.env.API_KEY;
 
-app.get('/api/weather/:latlon', async (req, resp) => {
-  const latlon = req.params.latlon.split(',');
-  const lat = latlon[0];
-  const lon = latlon[1];
-  const user_id = 22;
+app.post('/saveLocation', async (req, res) => {
+  const data = req.body;
   try {
     pool.query(
       'INSERT INTO work_locations (user_id, latitude, longitude) VALUES ($1, $2, $3)',
-      [user_id, lat, lon],
+      [data.user_id, data.lat, data.lon],
       (err, result) => {
         if (err) {
           console.log(err);
@@ -53,17 +50,24 @@ app.get('/api/weather/:latlon', async (req, resp) => {
         }
       }
     );
-    const response = await axios.get(
-      `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${key}&units=${units}&lang${lang}`
-    );
-    resp.send(response.data);
+    res.send({ message: 'location successfully logged to database' });
   } catch (err) {
-    resp.send({
+    res.send({
       message: 'server error',
       status: 500,
     });
     console.error(err);
   }
+});
+
+app.get('/api/weather/:latlon', async (req, resp) => {
+  const latlon = req.params.latlon.split(',');
+  const lat = latlon[0];
+  const lon = latlon[1];
+  const response = await axios.get(
+    `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${key}&units=${units}&lang${lang}`
+  );
+  resp.send(response.data);
 });
 
 app.post('/register', async (req, res) => {
@@ -94,37 +98,40 @@ app.post('/login', async (req, res) => {
   const password = req.body.password;
   const timestamp = dayjs.utc().format('YYYY-MM-DD HH:mm:ss').toString();
 
-  pool.query('SELECT username, password FROM users', async (err, result) => {
-    const user = result.rows.find((user) => user.username === username);
-    if (err) {
-      console.log(err);
-    }
-    try {
-      const checkPassword = await bcrypt.compare(password, user.password);
-      if (checkPassword) {
-        const id = user.username;
-        const token = jwt.sign({ id }, process.env.ACCESS_TOKEN_SECRET, {
-          expiresIn: 300, //five minutes
-        });
-
-        res.json({
-          message: 'login successful',
-          auth: true,
-          last_login_attempt: timestamp,
-          token: token,
-        });
-      } else {
-        res.send({
-          massage: 'wrong username and password combination',
-          auth: false,
-          last_login_attempt: timestamp,
-        });
+  pool.query(
+    'SELECT user_id, username, password FROM users',
+    async (err, result) => {
+      const user = result.rows.find((user) => user.username === username);
+      if (err) {
+        console.log(err);
       }
-    } catch {
-      console.log(err);
-      res.status(500).send();
+      try {
+        const checkPassword = await bcrypt.compare(password, user.password);
+        if (checkPassword) {
+          const id = { username: user.username, user_id: user.user_id };
+          const token = jwt.sign(id, process.env.ACCESS_TOKEN_SECRET, {
+            expiresIn: 300,
+          });
+
+          res.json({
+            message: 'login successful',
+            auth: true,
+            last_login_attempt: timestamp,
+            token: token,
+          });
+        } else {
+          res.send({
+            massage: 'wrong username and password combination',
+            auth: false,
+            last_login_attempt: timestamp,
+          });
+        }
+      } catch {
+        console.log(err);
+        res.status(500).send();
+      }
     }
-  });
+  );
   pool.query(
     'UPDATE users SET last_login_attempt = $1 WHERE username = $2',
     [timestamp, username],
@@ -149,7 +156,7 @@ const verifyJWT = (req, res, next) => {
       if (err) {
         res.send({ auth: false, message: 'failed to authenticate' });
       } else {
-        req.userId = decoded.id;
+        req.userId = decoded;
         next();
       }
     });
@@ -160,6 +167,7 @@ app.get('/authCheck', verifyJWT, (req, res) => {
   res.send({
     auth: true,
     message: 'authentication successful',
-    username: req.userId,
+    username: req.userId.username,
+    user_id: req.userId.user_id,
   });
 });
