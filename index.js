@@ -40,7 +40,19 @@ app.get('/api/weather/:latlon', async (req, resp) => {
   const latlon = req.params.latlon.split(',');
   const lat = latlon[0];
   const lon = latlon[1];
+  const user_id = 22;
   try {
+    pool.query(
+      'INSERT INTO work_locations (user_id, latitude, longitude) VALUES ($1, $2, $3)',
+      [user_id, lat, lon],
+      (err, result) => {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log(result);
+        }
+      }
+    );
     const response = await axios.get(
       `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${key}&units=${units}&lang${lang}`
     );
@@ -90,7 +102,7 @@ app.post('/login', async (req, res) => {
     try {
       const checkPassword = await bcrypt.compare(password, user.password);
       if (checkPassword) {
-        const id = user.user_id;
+        const id = user.username;
         const token = jwt.sign({ id }, process.env.ACCESS_TOKEN_SECRET, {
           expiresIn: 300, //five minutes
         });
@@ -145,5 +157,9 @@ const verifyJWT = (req, res, next) => {
 };
 
 app.get('/authCheck', verifyJWT, (req, res) => {
-  res.send({ auth: true, message: 'authentication successful' });
+  res.send({
+    auth: true,
+    message: 'authentication successful',
+    username: req.userId,
+  });
 });
