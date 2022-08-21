@@ -39,37 +39,42 @@ const key = process.env.API_KEY;
 app.post('/saveLocation', async (req, res) => {
   const data = req.body;
   try {
-    const coords = await pool.query(
-      'SELECT latitude, longitude FROM work_locations WHERE user_id = $1',
-      [data.user_id]
-    );
-    const checkLat = (obj) => {
-      if (obj.latitude == data.lat) {
+    const users = await pool.query('SELECT user_id FROM work_locations');
+    const checkUsers = (obj) => {
+      if (obj.user_id === data.user_id) {
         return true;
       }
       return false;
     };
+    if (users.rows.some(checkUsers)) {
+      const coords = await pool.query(
+        'SELECT latitude, longitude FROM work_locations WHERE user_id = $1',
+        [data.user_id]
+      );
+      const checkLat = (obj) => {
+        if (obj.latitude == data.lat) {
+          return true;
+        }
+        return false;
+      };
 
-    const checkLon = (obj) => {
-      if (obj.longitude == data.lon) {
-        return true;
+      const checkLon = (obj) => {
+        if (obj.longitude == data.lon) {
+          return true;
+        }
+        return false;
+      };
+      if (coords.rows.some(checkLat) && coords.rows.some(checkLon)) {
+        console.log('user found and location already saved');
+        res.send({ message: 'location already saved' });
       }
-      return false;
-    };
-    if (coords.rows.some(checkLat) && coords.rows.some(checkLon)) {
-      res.send({ message: 'location already saved' });
     } else {
+      // was having error here when using a callback for err, not sure why
       pool.query(
         'INSERT INTO work_locations (user_id, latitude, longitude) VALUES ($1, $2, $3)',
-        [data.user_id, data.lat, data.lon],
-        (err, result) => {
-          if (err) {
-            console.log(err);
-          } else {
-            res.send({ message: 'location successfully saved to database' });
-          }
-        }
+        [data.user_id, data.lat, data.lon]
       );
+      res.send({ message: 'location successfully saved to database' });
     }
   } catch (err) {
     res.send({ message: 'server error', status: 500 });
