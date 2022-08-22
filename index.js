@@ -36,7 +36,7 @@ const lang = 'en';
 const units = 'metric';
 const key = process.env.API_KEY;
 
-app.post('/saveLocation', async (req, res) => {
+app.post('/save_location', async (req, res) => {
   const data = req.body;
   try {
     const users = await pool.query('SELECT user_id FROM work_locations');
@@ -185,11 +185,27 @@ const verifyJWT = (req, res, next) => {
   }
 };
 
-app.get('/authCheck', verifyJWT, (req, res) => {
+app.get('/auth_check', verifyJWT, (req, res) => {
   res.send({
     auth: true,
     message: 'authentication successful',
     username: req.userId.username,
     user_id: req.userId.user_id,
   });
+});
+
+app.post('/get_locations', async (req, res) => {
+  const data = req.body;
+  try {
+    const locations = await pool.query(
+      'SELECT latitude, longitude FROM work_locations WHERE user_id = $1',
+      [data.user_id]
+    );
+    res.send(locations.rows);
+  } catch (err) {
+    console.log(err);
+    res
+      .status(500)
+      .send({ message: 'oops, something went wrong', status: 500 });
+  }
 });
