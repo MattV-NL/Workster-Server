@@ -36,43 +36,58 @@ const lang = 'en';
 const units = 'metric';
 const key = process.env.API_KEY;
 
-app.post('/save_location', async (req, res) => {
-  const data = req.body;
-  try {
-    const users = await pool.query('SELECT user_id FROM work_locations');
-    const checkUsers = (obj) => {
-      if (obj.user_id === data.user_id) {
-        return true;
-      }
-      return false;
-    };
-    if (users.rows.some(checkUsers)) {
-      const coords = await pool.query(
-        'SELECT latitude, longitude FROM work_locations WHERE user_id = $1',
-        [data.user_id]
-      );
-      const checkLat = (obj) => {
-        if (obj.latitude == data.lat) {
-          return true;
-        }
-        return false;
-      };
+const userHasLocation = async (givenUserId) => {
+  const response = await pool.query('SELECT user_id FROM work_locations');
+  const checkUsers = (storedUser) => {
+    if (storedUser.user_id === givenUserId) {
+      return true;
+    }
+    return false;
+  };
+  if (response.rows.some(checkUsers)) {
+    return true;
+  } else {
+    return false;
+  }
+};
 
-      const checkLon = (obj) => {
-        if (obj.longitude == data.lon) {
-          return true;
-        }
-        return false;
-      };
-      if (coords.rows.some(checkLat) && coords.rows.some(checkLon)) {
-        console.log('user found and location already saved');
-        res.send({ message: 'location already saved' });
-      }
+const locationIsSaved = async (user_id, lon, lat) => {
+  const response = await pool.query(
+    'SELECT latitude, longitude FROM work_locations WHERE user_id = $1',
+    [user_id]
+  );
+  const checkLat = (coordinate) => {
+    if (coordinate.latitude == lat) {
+      return true;
+    }
+    return false;
+  };
+
+  const checkLon = (coordinate) => {
+    if (coordinate.longitude == lon) {
+      return true;
+    }
+    return false;
+  };
+  if (response.rows.some(checkLat) && response.rows.some(checkLon)) {
+    return true;
+  } else {
+    false;
+  }
+};
+
+app.post('/save_location', async (req, res) => {
+  const body = req.body;
+  try {
+    if (
+      (await userHasLocation(body.user_id)) &&
+      (await locationIsSaved(body.user_id, body.longitude, body.latitude))
+    ) {
+      res.send({ message: 'location already saved' });
     } else {
-      // was having error here when using a callback for err, not sure why
-      pool.query(
+      await pool.query(
         'INSERT INTO work_locations (user_id, latitude, longitude) VALUES ($1, $2, $3)',
-        [data.user_id, data.lat, data.lon]
+        [body.user_id, body.lat, body.lon]
       );
       res.send({ message: 'location successfully saved to database' });
     }
@@ -132,7 +147,7 @@ app.post('/login', async (req, res) => {
         if (checkPassword) {
           const id = { username: user.username, user_id: user.user_id };
           const token = jwt.sign(id, process.env.ACCESS_TOKEN_SECRET, {
-            expiresIn: 300,
+            expiresIn: 1000,
           });
 
           res.json({
@@ -198,7 +213,7 @@ app.post('/get_locations', async (req, res) => {
   const data = req.body;
   try {
     const locations = await pool.query(
-      'SELECT latitude, longitude FROM work_locations WHERE user_id = $1',
+      'SELECT latitude, longitude, location_id FROM work_locations WHERE user_id = $1',
       [data.user_id]
     );
     res.send(locations.rows);
