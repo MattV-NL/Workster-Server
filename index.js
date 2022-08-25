@@ -117,18 +117,30 @@ app.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     pool.query(
       `INSERT INTO users (username, email, password, created_on) VALUES ($1, $2, $3, $4)`,
-      [username, email, hashedPassword, timestamp],
-      (err, result) => {
-        if (err) {
-          console.log(err);
-        }
-      }
+      [username, email, hashedPassword, timestamp]
     );
     res.send({ message: 'registration successful' });
-  } catch {
-    res.status(500).send();
+  } catch (err) {
+    res.status(500).send({ message: 'oops, something went wrong' });
+    console.log(err);
   }
 });
+
+const verifyPassword = async (givenPassword, storedPassword) => {
+  await bcrypt.compare(storedPassword, givenPassword);
+};
+
+const updateLastLoginAttempt = async (timestamp, username) => {
+  try {
+    pool.query('UPDATE users SET last_login_attempt = $1 WHERE username = $2', [
+      timestamp,
+      username,
+    ]);
+    console.log({ message: `logged last login attempt for ${username}` });
+  } catch (err) {
+    console.log(err);
+  }
+};
 
 app.post('/login', async (req, res) => {
   const username = req.body.username;
@@ -138,18 +150,16 @@ app.post('/login', async (req, res) => {
   pool.query(
     'SELECT user_id, username, password FROM users',
     async (err, result) => {
-      const user = result.rows.find((user) => user.username === username);
-      if (err) {
-        console.log(err);
-      }
+      const userInfo = result.rows.find((body) => body.username === username);
       try {
-        const checkPassword = await bcrypt.compare(password, user.password);
-        if (checkPassword) {
-          const id = { username: user.username, user_id: user.user_id };
-          const token = jwt.sign(id, process.env.ACCESS_TOKEN_SECRET, {
+        if (verifyPassword(password, userInfo.password)) {
+          const jwtPayload = {
+            username: userInfo.username,
+            user_id: userInfo.user_id,
+          };
+          const token = jwt.sign(jwtPayload, process.env.ACCESS_TOKEN_SECRET, {
             expiresIn: 1000,
           });
-
           res.json({
             message: 'login successful',
             auth: true,
@@ -163,28 +173,16 @@ app.post('/login', async (req, res) => {
             last_login_attempt: timestamp,
           });
         }
-      } catch {
+      } catch (err) {
         console.log(err);
         res.status(500).send();
       }
     }
   );
-  pool.query(
-    'UPDATE users SET last_login_attempt = $1 WHERE username = $2',
-    [timestamp, username],
-    async (err, result) => {
-      if (err) {
-        res.send(err);
-      } else {
-        console.log({
-          message: `logged last_login_attempt for ${username}`,
-        });
-      }
-    }
-  );
+  updateLastLoginAttempt(timestamp, username);
 });
 
-const verifyJWT = (req, res, next) => {
+const verifyToken = (req, res, next) => {
   const token = req.headers['x-access-token'];
   if (!token) {
     res.send({ message: 'no authorization token found' });
@@ -200,7 +198,7 @@ const verifyJWT = (req, res, next) => {
   }
 };
 
-app.get('/auth_check', verifyJWT, (req, res) => {
+app.get('/auth_check', verifyToken, (req, res) => {
   res.send({
     auth: true,
     message: 'authentication successful',
@@ -210,11 +208,11 @@ app.get('/auth_check', verifyJWT, (req, res) => {
 });
 
 app.post('/get_locations', async (req, res) => {
-  const data = req.body;
+  const body = req.body;
   try {
     const locations = await pool.query(
       'SELECT latitude, longitude, location_id FROM work_locations WHERE user_id = $1',
-      [data.user_id]
+      [body.user_id]
     );
     res.send(locations.rows);
   } catch (err) {
