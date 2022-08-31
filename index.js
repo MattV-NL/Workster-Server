@@ -222,3 +222,27 @@ app.post('/get_locations', async (req, res) => {
       .send({ message: 'oops, something went wrong', status: 500 });
   }
 });
+
+app.post('/save_work_information', async (req, res) => {
+  const body = req.body;
+  const timestamp = dayjs.utc().format('YYYY-MM-DD HH:mm:ss').toString();
+
+  try {
+    await pool.query(
+      'INSERT into work_information (created_at, location_id, date, is_outside, is_welding, is_scaffolding, work_details) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+      [
+        timestamp,
+        body.location_id,
+        body.date,
+        body.isOutside,
+        body.isWelding,
+        body.isScaffolding,
+        body.workDetails,
+      ]
+    );
+    res.send({ message: 'work information logged to database' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({ message: 'opps something went wrong', error: err });
+  }
+});
