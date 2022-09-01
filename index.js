@@ -232,7 +232,7 @@ app.post('/save_work_information', async (req, res) => {
       'INSERT into work_information (created_at, location_id, date, is_outside, is_welding, is_scaffolding, work_details) VALUES ($1, $2, $3, $4, $5, $6, $7)',
       [
         timestamp,
-        body.location_id,
+        body.workLocation.location_id,
         body.date,
         body.isOutside,
         body.isWelding,
