@@ -256,3 +256,20 @@ app.get('/get_work_information/:location_id', async (req, res) => {
 
   res.send(work_information.rows);
 });
+
+app.post('/delete_work_information', async (req, res) => {
+  const body = req.body;
+  try {
+    await pool.query('DELETE FROM work_information WHERE information_id = $1', [
+      body.rowId,
+    ]);
+    res.send({ message: 'successfully deleted row' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      message: 'oops, something went wrong',
+      error_code: 500,
+      error_message: err,
+    });
+  }
+});
