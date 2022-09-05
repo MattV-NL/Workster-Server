@@ -259,9 +259,10 @@ app.get('/get_work_information/:location_id', async (req, res) => {
 
 app.post('/delete_work_information', async (req, res) => {
   const body = req.body;
+  console.log(body.information_id);
   try {
     await pool.query('DELETE FROM work_information WHERE information_id = $1', [
-      body.rowId,
+      body.information_id,
     ]);
     res.send({ message: 'successfully deleted row' });
   } catch (err) {
@@ -271,5 +272,19 @@ app.post('/delete_work_information', async (req, res) => {
       error_code: 500,
       error_message: err,
     });
+  }
+});
+
+app.post('/delete_location', async (req, res) => {
+  const body = req.body;
+  console.log(body.location_id);
+  try {
+    await pool.query('DELETE FROM work_locations WHERE location_id = $1', [
+      body.location_id,
+    ]);
+    res.send({ message: 'sucessfully deleted row' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({ message: 'oops, something went wrong', error: err });
   }
 });
