@@ -158,7 +158,7 @@ app.post('/login', async (req, res) => {
             user_id: userInfo.user_id,
           };
           const token = jwt.sign(jwtPayload, process.env.ACCESS_TOKEN_SECRET, {
-            expiresIn: 1000,
+            expiresIn: 300,
           });
           res.json({
             message: 'login successful',
@@ -220,5 +220,69 @@ app.post('/get_locations', async (req, res) => {
     res
       .status(500)
       .send({ message: 'oops, something went wrong', status: 500 });
+  }
+});
+
+app.post('/save_work_information', async (req, res) => {
+  const body = req.body;
+  const timestamp = dayjs.utc().format('YYYY-MM-DD HH:mm:ss').toString();
+
+  try {
+    await pool.query(
+      'INSERT into work_information (created_at, location_id, date, is_outside, is_welding, is_scaffolding, work_details) VALUES ($1, $2, $3, $4, $5, $6, $7)',
+      [
+        timestamp,
+        body.workLocation.location_id,
+        body.date,
+        body.isOutside,
+        body.isWelding,
+        body.isScaffolding,
+        body.workDetails,
+      ]
+    );
+    res.send({ message: 'work information logged to database' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({ message: 'opps something went wrong', error: err });
+  }
+});
+
+app.get('/get_work_information/:location_id', async (req, res) => {
+  const location_id = req.params.location_id;
+  const work_information = await pool.query(
+    'SELECT * FROM work_information WHERE location_id = $1',
+    [location_id]
+  );
+
+  res.send(work_information.rows);
+});
+
+app.post('/delete_work_information', async (req, res) => {
+  const body = req.body;
+  try {
+    await pool.query('DELETE FROM work_information WHERE information_id = $1', [
+      body.information_id,
+    ]);
+    res.send({ message: 'successfully deleted row' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({
+      message: 'oops, something went wrong',
+      error_code: 500,
+      error_message: err,
+    });
+  }
+});
+
+app.post('/delete_location', async (req, res) => {
+  const body = req.body;
+  try {
+    await pool.query('DELETE FROM work_locations WHERE location_id = $1', [
+      body.location_id,
+    ]);
+    res.send({ message: 'sucessfully deleted row' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).send({ message: 'oops, something went wrong', error: err });
   }
 });
