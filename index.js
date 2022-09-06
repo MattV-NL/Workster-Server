@@ -158,7 +158,7 @@ app.post('/login', async (req, res) => {
             user_id: userInfo.user_id,
           };
           const token = jwt.sign(jwtPayload, process.env.ACCESS_TOKEN_SECRET, {
-            expiresIn: 1000,
+            expiresIn: 300,
           });
           res.json({
             message: 'login successful',
@@ -259,7 +259,6 @@ app.get('/get_work_information/:location_id', async (req, res) => {
 
 app.post('/delete_work_information', async (req, res) => {
   const body = req.body;
-  console.log(body.information_id);
   try {
     await pool.query('DELETE FROM work_information WHERE information_id = $1', [
       body.information_id,
@@ -277,7 +276,6 @@ app.post('/delete_work_information', async (req, res) => {
 
 app.post('/delete_location', async (req, res) => {
   const body = req.body;
-  console.log(body.location_id);
   try {
     await pool.query('DELETE FROM work_locations WHERE location_id = $1', [
       body.location_id,
