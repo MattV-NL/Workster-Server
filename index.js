@@ -10,6 +10,7 @@ const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const deleteRow = require('./utilFunc/deleteRow');
 
 const corsOptions = {
   origin: 'http://localhost:3000',
@@ -158,7 +159,7 @@ app.post('/login', async (req, res) => {
             user_id: userInfo.user_id,
           };
           const token = jwt.sign(jwtPayload, process.env.ACCESS_TOKEN_SECRET, {
-            expiresIn: 300,
+            expiresIn: 1000,
           });
           res.json({
             message: 'login successful',
@@ -258,31 +259,13 @@ app.get('/get_work_information/:location_id', async (req, res) => {
 });
 
 app.post('/delete_work_information', async (req, res) => {
-  const body = req.body;
-  try {
-    await pool.query('DELETE FROM work_information WHERE information_id = $1', [
-      body.information_id,
-    ]);
-    res.send({ message: 'successfully deleted row' });
-  } catch (err) {
-    console.log(err);
-    res.status(500).send({
-      message: 'oops, something went wrong',
-      error_code: 500,
-      error_message: err,
-    });
-  }
+  const information_id = req.body.information_id;
+  res.send(
+    await deleteRow(pool, 'work_information', 'information_id', information_id)
+  );
 });
 
 app.post('/delete_location', async (req, res) => {
-  const body = req.body;
-  try {
-    await pool.query('DELETE FROM work_locations WHERE location_id = $1', [
-      body.location_id,
-    ]);
-    res.send({ message: 'sucessfully deleted row' });
-  } catch (err) {
-    console.log(err);
-    res.status(500).send({ message: 'oops, something went wrong', error: err });
-  }
+  const location_id = req.body.location_id;
+  res.send(await deleteRow(pool, 'work_locations', 'location_id', location_id));
 });
