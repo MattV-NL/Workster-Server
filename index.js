@@ -34,7 +34,7 @@ app.listen(PORT, () => {
 });
 
 const lang = 'en';
-const units = 'metric';
+// const units = 'metric';
 const key = process.env.API_KEY;
 
 const userHasLocation = async (givenUserId) => {
@@ -98,10 +98,11 @@ app.post('/save_location', async (req, res) => {
   }
 });
 
-app.get('/api/weather/:latlon', async (req, resp) => {
-  const latlon = req.params.latlon.split(',');
-  const lat = latlon[0];
-  const lon = latlon[1];
+app.get('/api/weather/:latlonunits', async (req, resp) => {
+  const latlonunits = req.params.latlonunits.split(',');
+  const lat = latlonunits[0];
+  const lon = latlonunits[1];
+  const units = latlonunits[2];
   const response = await axios.get(
     `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${key}&units=${units}&lang${lang}`
   );
@@ -159,7 +160,7 @@ app.post('/login', async (req, res) => {
             user_id: userInfo.user_id,
           };
           const token = jwt.sign(jwtPayload, process.env.ACCESS_TOKEN_SECRET, {
-            expiresIn: 1000,
+            expiresIn: '30m',
           });
           res.json({
             message: 'login successful',
@@ -268,4 +269,26 @@ app.post('/delete_work_information', async (req, res) => {
 app.post('/delete_location', async (req, res) => {
   const location_id = req.body.location_id;
   res.send(await deleteRow(pool, 'work_locations', 'location_id', location_id));
+});
+
+app.post('/save_settings', async (req, res) => {
+  const settings = req.body;
+  const darkMode = settings.darkMode;
+  const units = settings.units;
+  const user_id = settings.user_id;
+  try {
+    await pool.query(
+      'INSERT into user_settings (darkMode_on, measurement_unit, user_id) VALUES ($1, $2, $3)',
+      [darkMode, units, user_id]
+    );
+    res.send({
+      message: 'settings save to db',
+    });
+  } catch (err) {
+    console.log(err);
+    res.send({
+      message: 'oops something went wrong',
+      error: err,
+    });
+  }
 });
