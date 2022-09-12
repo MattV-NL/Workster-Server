@@ -34,7 +34,6 @@ app.listen(PORT, () => {
 });
 
 const lang = 'en';
-// const units = 'metric';
 const key = process.env.API_KEY;
 
 const userHasLocation = async (givenUserId) => {
@@ -271,23 +270,76 @@ app.post('/delete_location', async (req, res) => {
   res.send(await deleteRow(pool, 'work_locations', 'location_id', location_id));
 });
 
+const userHasSettingsSaved = async (givenUserId) => {
+  const response = await pool.query('SELECT user_id FROM user_settings');
+  const checkUsers = (storedUser) => {
+    if (storedUser.user_id === givenUserId) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+  if (response.rows.some(checkUsers)) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
 app.post('/save_settings', async (req, res) => {
   const settings = req.body;
   const darkMode = settings.darkMode;
   const units = settings.units;
   const user_id = settings.user_id;
   try {
-    await pool.query(
-      'INSERT into user_settings (darkMode_on, measurement_unit, user_id) VALUES ($1, $2, $3)',
-      [darkMode, units, user_id]
-    );
-    res.send({
-      message: 'settings save to db',
-    });
+    if (await userHasSettingsSaved(user_id)) {
+      await pool.query(
+        'UPDATE user_settings SET darkmode_on = $1, measurement_unit = $2 WHERE user_id = $3',
+        [darkMode, units, user_id]
+      );
+      res.send({
+        message: 'settings updated',
+      });
+    } else {
+      await pool.query(
+        'INSERT into user_settings (darkMode_on, measurement_unit, user_id) VALUES ($1, $2, $3)',
+        [darkMode, units, user_id]
+      );
+      res.send({
+        message: 'settings save to db',
+      });
+    }
   } catch (err) {
     console.log(err);
     res.send({
       message: 'oops something went wrong',
+      error: err,
+    });
+  }
+});
+
+app.post('/get_settings', async (req, res) => {
+  const body = req.body;
+  try {
+    if (await userHasSettingsSaved(body.user_id)) {
+      const settings = await pool.query(
+        'SELECT darkmode_on, measurement_unit FROM user_settings WHERE user_id = $1',
+        [body.user_id]
+      );
+      res.send(settings.rows);
+    } else {
+      const defaultResponse = [
+        {
+          darkmode_on: true,
+          measurement_unit: 'mertic',
+        },
+      ];
+      res.send(defaultResponse);
+    }
+  } catch (err) {
+    console.log(err);
+    res.send({
+      message: 'oops, something went wrong',
       error: err,
     });
   }
