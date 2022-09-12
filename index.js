@@ -10,6 +10,7 @@ const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const deleteRow = require('./utilFunc/deleteRow');
 
 const corsOptions = {
   origin: 'http://localhost:3000',
@@ -33,7 +34,6 @@ app.listen(PORT, () => {
 });
 
 const lang = 'en';
-const units = 'metric';
 const key = process.env.API_KEY;
 
 const userHasLocation = async (givenUserId) => {
@@ -97,10 +97,11 @@ app.post('/save_location', async (req, res) => {
   }
 });
 
-app.get('/api/weather/:latlon', async (req, resp) => {
-  const latlon = req.params.latlon.split(',');
-  const lat = latlon[0];
-  const lon = latlon[1];
+app.get('/api/weather/:latlonunits', async (req, resp) => {
+  const latlonunits = req.params.latlonunits.split(',');
+  const lat = latlonunits[0];
+  const lon = latlonunits[1];
+  const units = latlonunits[2];
   const response = await axios.get(
     `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${key}&units=${units}&lang${lang}`
   );
@@ -158,7 +159,7 @@ app.post('/login', async (req, res) => {
             user_id: userInfo.user_id,
           };
           const token = jwt.sign(jwtPayload, process.env.ACCESS_TOKEN_SECRET, {
-            expiresIn: 300,
+            expiresIn: '30m',
           });
           res.json({
             message: 'login successful',
@@ -258,31 +259,88 @@ app.get('/get_work_information/:location_id', async (req, res) => {
 });
 
 app.post('/delete_work_information', async (req, res) => {
-  const body = req.body;
+  const information_id = req.body.information_id;
+  res.send(
+    await deleteRow(pool, 'work_information', 'information_id', information_id)
+  );
+});
+
+app.post('/delete_location', async (req, res) => {
+  const location_id = req.body.location_id;
+  res.send(await deleteRow(pool, 'work_locations', 'location_id', location_id));
+});
+
+const userHasSettingsSaved = async (givenUserId) => {
+  const response = await pool.query('SELECT user_id FROM user_settings');
+  const checkUsers = (storedUser) => {
+    if (storedUser.user_id === givenUserId) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+  if (response.rows.some(checkUsers)) {
+    return true;
+  } else {
+    return false;
+  }
+};
+
+app.post('/save_settings', async (req, res) => {
+  const settings = req.body;
+  const darkMode = settings.darkMode;
+  const units = settings.units;
+  const user_id = settings.user_id;
   try {
-    await pool.query('DELETE FROM work_information WHERE information_id = $1', [
-      body.information_id,
-    ]);
-    res.send({ message: 'successfully deleted row' });
+    if (await userHasSettingsSaved(user_id)) {
+      await pool.query(
+        'UPDATE user_settings SET darkmode_on = $1, measurement_unit = $2 WHERE user_id = $3',
+        [darkMode, units, user_id]
+      );
+      res.send({
+        message: 'settings updated',
+      });
+    } else {
+      await pool.query(
+        'INSERT into user_settings (darkMode_on, measurement_unit, user_id) VALUES ($1, $2, $3)',
+        [darkMode, units, user_id]
+      );
+      res.send({
+        message: 'settings save to db',
+      });
+    }
   } catch (err) {
     console.log(err);
-    res.status(500).send({
-      message: 'oops, something went wrong',
-      error_code: 500,
-      error_message: err,
+    res.send({
+      message: 'oops something went wrong',
+      error: err,
     });
   }
 });
 
-app.post('/delete_location', async (req, res) => {
+app.post('/get_settings', async (req, res) => {
   const body = req.body;
   try {
-    await pool.query('DELETE FROM work_locations WHERE location_id = $1', [
-      body.location_id,
-    ]);
-    res.send({ message: 'sucessfully deleted row' });
+    if (await userHasSettingsSaved(body.user_id)) {
+      const settings = await pool.query(
+        'SELECT darkmode_on, measurement_unit FROM user_settings WHERE user_id = $1',
+        [body.user_id]
+      );
+      res.send(settings.rows);
+    } else {
+      const defaultResponse = [
+        {
+          darkmode_on: true,
+          measurement_unit: 'mertic',
+        },
+      ];
+      res.send(defaultResponse);
+    }
   } catch (err) {
     console.log(err);
-    res.status(500).send({ message: 'oops, something went wrong', error: err });
+    res.send({
+      message: 'oops, something went wrong',
+      error: err,
+    });
   }
 });
