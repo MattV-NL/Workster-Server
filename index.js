@@ -302,7 +302,7 @@ app.post('/save_settings', async (req, res) => {
       });
     } else {
       await pool.query(
-        'INSERT into user_settings (darkMode_on, measurement_unit, user_id) VALUES ($1, $2, $3)',
+        'INSERT into user_settings (darkmode_on, measurement_unit, user_id) VALUES ($1, $2, $3)',
         [darkMode, units, user_id]
       );
       res.send({
