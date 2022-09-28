@@ -6,29 +6,42 @@ const emailAlert = async (pool) => {
       'SELECT email_notifications, user_id, measurement_unit FROM user_settings WHERE email_notifications = true'
     );
     const users = response.rows;
-    const getLocations = async (user) => {
+    const getUserInformation = async (user) => {
       const response = await pool.query(
         'SELECT latitude, longitude, user_id FROM work_locations WHERE user_id = $1',
         [user.user_id]
       );
       const storedLocations = await response.rows;
 
+      const responseTwo = await pool.query(
+        'SELECT email, user_id, username FROM users WHERE user_id = $1',
+        [user.user_id]
+      );
+
+      const userEmails = await responseTwo.rows;
+
       const combinedResponse = storedLocations.map(
         ({ latitude, longitude, user_id }) => {
           const userUnits = users.find((user) => user.user_id === user_id);
+          const userCredentials = userEmails.find(
+            (user) => user.user_id === user_id
+          );
 
           return {
             latitude,
             longitude,
             user_id,
             unit: userUnits.measurement_unit,
+            email: userCredentials.email,
+            username: userCredentials.username,
           };
         }
       );
 
       return combinedResponse;
     };
-    const locationsArray = await Promise.all(users.map(getLocations));
+
+    const locationsArray = await Promise.all(users.map(getUserInformation));
     let key = 0;
     let locationsMap = new Map();
 
@@ -40,12 +53,11 @@ const emailAlert = async (pool) => {
     );
     const locations = Array.from([...locationsMap.values()]);
 
-    // limit number of API calls to every three hours for example
-    // package alert in a sendgridAPI email
-
-    // locations.forEach(({ latitude, longitude, unit }, index) => {
-    //   fetchWeatherAlert(latitude, longitude, unit, index);
-    // });
+    locations.forEach(
+      ({ latitude, longitude, unit, email, username }, index) => {
+        fetchWeatherAlert(latitude, longitude, unit, email, username, index);
+      }
+    );
   } catch (err) {
     console.log(err);
     return;
