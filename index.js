@@ -14,6 +14,7 @@ const deleteRow = require('./utilFunc/deleteRow');
 const checkForSavedData = require('./utilFunc/checkForSavedData');
 const emailAlert = require('./utilFunc/emailAlert');
 const updateLastLoginAttempt = require('./utilFunc/updateLastLogin');
+const cron = require('node-cron');
 
 const corsOptions = {
   origin: 'http://localhost:3000',
@@ -29,7 +30,11 @@ const pool = new Pool({
   connectionTimeoutMillis: 0,
   idleTimeoutMillis: 0,
 });
+// cron.schedule('0 */3 * * *', () => {
 emailAlert(pool);
+//   console.log('ran');
+// });
+
 app.use(cors(corsOptions));
 app.use(express.json());
 app.listen(PORT, () => {

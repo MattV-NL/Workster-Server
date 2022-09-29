@@ -7,25 +7,25 @@ const key = process.env.API_KEY;
 const lang = 'en';
 
 const fetchWeatherAlert = async (lat, lon, unit, email, username, index) => {
-  const response = await axios.get(
-    `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${key}&units=${unit}&lang${lang}`
-  );
+  try {
+    const response = await axios.get(
+      `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${key}&units=${unit}&lang${lang}`
+    );
 
-  const sampleAlert = [
-    {
-      sender_name:
-        'NWS Philadelphia - Mount Holly (New Jersey, Delaware, Southeastern Pennsylvania)',
-      event: 'Small Craft Advisory',
-      start: 1646344800,
-      end: 1646380800,
-      description:
-        '...SMALL CRAFT ADVISORY REMAINS IN EFFECT FROM 5 PM THIS\nAFTERNOON TO 3 AM EST FRIDAY...\n* WHAT...North winds 15 to 20 kt with gusts up to 25 kt and seas\n3 to 5 ft expected.\n* WHERE...Coastal waters from Little Egg Inlet to Great Egg\nInlet NJ out 20 nm, Coastal waters from Great Egg Inlet to\nCape May NJ out 20 nm and Coastal waters from Manasquan Inlet\nto Little Egg Inlet NJ out 20 nm.\n* WHEN...From 5 PM this afternoon to 3 AM EST Friday.\n* IMPACTS...Conditions will be hazardous to small craft.',
-      tags: [],
-    },
-  ];
-  if (response.data.alerts) {
-    client
-      .send({
+    const sampleAlert = [
+      {
+        sender_name:
+          'NWS Philadelphia - Mount Holly (New Jersey, Delaware, Southeastern Pennsylvania)',
+        event: 'Small Craft Advisory',
+        start: 1646344800,
+        end: 1646380800,
+        description:
+          'Some description of weather events in the area. Look at this text to determine how to format it in the email template. Add colors, and possibly the logo for the app. Look into the tags identifier below in openweatherAPI documentation.',
+        tags: [],
+      },
+    ];
+    if (response.data.alerts) {
+      const response = await client.send({
         to: {
           email,
           name: username,
@@ -38,13 +38,21 @@ const fetchWeatherAlert = async (lat, lon, unit, email, username, index) => {
         dynamicTemplateData: {
           alert: sampleAlert[0].description,
         },
-      })
-      .then(() => {
-        console.log(`an email was sent to ${username}`);
       });
-  } else {
-    console.log('no active weather alerts', index);
-    return;
+
+      if (response.statusCode(202)) {
+        return true;
+      } else {
+        console.log('error', response.status());
+        return false;
+      }
+    } else {
+      console.log('no active weather alerts', index);
+      return true;
+    }
+  } catch (err) {
+    console.log(err);
+    return false;
   }
 };
 
