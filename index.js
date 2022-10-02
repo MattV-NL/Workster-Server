@@ -30,10 +30,10 @@ const pool = new Pool({
   connectionTimeoutMillis: 0,
   idleTimeoutMillis: 0,
 });
-// cron.schedule('0 */3 * * *', () => {
-emailAlert(pool);
-//   console.log('ran');
-// });
+
+cron.schedule('0 */3 * * *', () => {
+  emailAlert(pool);
+});
 
 app.use(cors(corsOptions));
 app.use(express.json());
