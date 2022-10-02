@@ -11,6 +11,10 @@ dayjs.extend(utc);
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const deleteRow = require('./utilFunc/deleteRow');
+const checkForSavedData = require('./utilFunc/checkForSavedData');
+const emailAlert = require('./utilFunc/emailAlert');
+const updateLastLoginAttempt = require('./utilFunc/updateLastLogin');
+const cron = require('node-cron');
 
 const corsOptions = {
   origin: 'http://localhost:3000',
@@ -27,6 +31,10 @@ const pool = new Pool({
   idleTimeoutMillis: 0,
 });
 
+cron.schedule('0 */3 * * *', () => {
+  emailAlert(pool);
+});
+
 app.use(cors(corsOptions));
 app.use(express.json());
 app.listen(PORT, () => {
@@ -36,35 +44,20 @@ app.listen(PORT, () => {
 const lang = 'en';
 const key = process.env.API_KEY;
 
-const userHasLocation = async (givenUserId) => {
-  const response = await pool.query('SELECT user_id FROM work_locations');
-  const checkUsers = (storedUser) => {
-    if (storedUser.user_id === givenUserId) {
-      return true;
-    }
-    return false;
-  };
-  if (response.rows.some(checkUsers)) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
 const locationIsSaved = async (user_id, lon, lat) => {
   const response = await pool.query(
     'SELECT latitude, longitude FROM work_locations WHERE user_id = $1',
     [user_id]
   );
-  const checkLat = (coordinate) => {
-    if (coordinate.latitude == lat) {
+  const checkLat = async (coordinate) => {
+    if ((await coordinate.latitude) == lat) {
       return true;
     }
     return false;
   };
 
-  const checkLon = (coordinate) => {
-    if (coordinate.longitude == lon) {
+  const checkLon = async (coordinate) => {
+    if ((await coordinate.longitude) == lon) {
       return true;
     }
     return false;
@@ -80,7 +73,7 @@ app.post('/save_location', async (req, res) => {
   const body = req.body;
   try {
     if (
-      (await userHasLocation(body.user_id)) &&
+      (await checkForSavedData(body.user_id, pool, 'work_locations')) &&
       (await locationIsSaved(body.user_id, body.longitude, body.latitude))
     ) {
       res.send({ message: 'location already saved' });
@@ -131,18 +124,6 @@ const verifyPassword = async (givenPassword, storedPassword) => {
   await bcrypt.compare(storedPassword, givenPassword);
 };
 
-const updateLastLoginAttempt = async (timestamp, username) => {
-  try {
-    pool.query('UPDATE users SET last_login_attempt = $1 WHERE username = $2', [
-      timestamp,
-      username,
-    ]);
-    console.log({ message: `logged last login attempt for ${username}` });
-  } catch (err) {
-    console.log(err);
-  }
-};
-
 app.post('/login', async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
@@ -180,7 +161,7 @@ app.post('/login', async (req, res) => {
       }
     }
   );
-  updateLastLoginAttempt(timestamp, username);
+  updateLastLoginAttempt(pool, timestamp, username);
 });
 
 const verifyToken = (req, res, next) => {
@@ -270,40 +251,26 @@ app.post('/delete_location', async (req, res) => {
   res.send(await deleteRow(pool, 'work_locations', 'location_id', location_id));
 });
 
-const userHasSettingsSaved = async (givenUserId) => {
-  const response = await pool.query('SELECT user_id FROM user_settings');
-  const checkUsers = (storedUser) => {
-    if (storedUser.user_id === givenUserId) {
-      return true;
-    } else {
-      return false;
-    }
-  };
-  if (response.rows.some(checkUsers)) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
 app.post('/save_settings', async (req, res) => {
   const settings = req.body;
   const darkMode = settings.darkMode;
   const units = settings.units;
   const user_id = settings.user_id;
+  const email_notifications = settings.emailNotifications;
+
   try {
-    if (await userHasSettingsSaved(user_id)) {
+    if (await checkForSavedData(user_id, pool, 'user_settings')) {
       await pool.query(
-        'UPDATE user_settings SET darkmode_on = $1, measurement_unit = $2 WHERE user_id = $3',
-        [darkMode, units, user_id]
+        'UPDATE user_settings SET darkmode_on = $1, measurement_unit = $2, email_notifications = $3 WHERE user_id = $4',
+        [darkMode, units, email_notifications, user_id]
       );
       res.send({
         message: 'settings updated',
       });
     } else {
       await pool.query(
-        'INSERT into user_settings (darkMode_on, measurement_unit, user_id) VALUES ($1, $2, $3)',
-        [darkMode, units, user_id]
+        'INSERT into user_settings (darkmode_on, measurement_unit, email_notifications, user_id) VALUES ($1, $2, $3, $4)',
+        [darkMode, units, email_notifications, user_id]
       );
       res.send({
         message: 'settings save to db',
@@ -319,19 +286,20 @@ app.post('/save_settings', async (req, res) => {
 });
 
 app.post('/get_settings', async (req, res) => {
-  const body = req.body;
+  const user_id = req.body.user_id;
   try {
-    if (await userHasSettingsSaved(body.user_id)) {
+    if (await checkForSavedData(user_id, pool, 'user_settings')) {
       const settings = await pool.query(
-        'SELECT darkmode_on, measurement_unit FROM user_settings WHERE user_id = $1',
-        [body.user_id]
+        'SELECT darkmode_on, measurement_unit, email_notifications FROM user_settings WHERE user_id = $1',
+        [user_id]
       );
       res.send(settings.rows);
     } else {
       const defaultResponse = [
         {
           darkmode_on: true,
-          measurement_unit: 'mertic',
+          measurement_unit: 'metric',
+          email_notifications: false,
         },
       ];
       res.send(defaultResponse);
