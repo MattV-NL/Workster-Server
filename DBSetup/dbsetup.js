@@ -5,11 +5,11 @@ dotenv.config({ path: '../.env' });
 
 const datasource = new typeorm.DataSource({
   type: 'postgres',
-  host: 'localhost',
+  host: process.env.POSTGRES_SERVER || 'localhost',
   port: 5432,
-  username: 'postgres',
+  username: process.env.POSTGRES_USER_DATABASE,
   password: process.env.POSTGRES_PW,
-  database: 'TypeOrmTutorial',
+  database: process.env.POSTGRES_USER_DATABASE,
   synchronize: true,
   entities: [
     require('./Entities/users'),

@@ -21,11 +21,11 @@ const corsOptions = {
 };
 
 const pool = new Pool({
-  host: 'localhost',
-  user: 'postgres',
+  host: process.env.POSTGRES_SERVER || 'localhost',
+  user: process.env.POSTGRES_USER_DATABASE,
   port: 5432,
   password: process.env.POSTGRES_PW,
-  database: 'wwadb',
+  database: process.env.POSTGRES_USER_DATABASE,
   max: 10,
   connectionTimeoutMillis: 0,
   idleTimeoutMillis: 0,
@@ -134,26 +134,34 @@ app.post('/login', async (req, res) => {
     async (err, result) => {
       const userInfo = result.rows.find((body) => body.username === username);
       try {
-        if (verifyPassword(password, userInfo.password)) {
-          const jwtPayload = {
-            username: userInfo.username,
-            user_id: userInfo.user_id,
-          };
-          const token = jwt.sign(jwtPayload, process.env.ACCESS_TOKEN_SECRET, {
-            expiresIn: '30m',
-          });
-          res.json({
-            message: 'login successful',
-            auth: true,
-            last_login_attempt: timestamp,
-            token: token,
-          });
+        if (!userInfo) {
+          res.status(401).send();
         } else {
-          res.send({
-            massage: 'wrong username and password combination',
-            auth: false,
-            last_login_attempt: timestamp,
-          });
+          if (verifyPassword(password, userInfo.password)) {
+            const jwtPayload = {
+              username: userInfo.username,
+              user_id: userInfo.user_id,
+            };
+            const token = jwt.sign(
+              jwtPayload,
+              process.env.ACCESS_TOKEN_SECRET,
+              {
+                expiresIn: '30m',
+              }
+            );
+            res.json({
+              message: 'login successful',
+              auth: true,
+              last_login_attempt: timestamp,
+              token: token,
+            });
+          } else {
+            res.send({
+              massage: 'wrong username and password combination',
+              auth: false,
+              last_login_attempt: timestamp,
+            });
+          }
         }
       } catch (err) {
         console.log(err);
@@ -208,6 +216,7 @@ app.post('/get_locations', async (req, res) => {
 app.post('/save_work_information', async (req, res) => {
   const body = req.body;
   const timestamp = dayjs.utc().format('YYYY-MM-DD HH:mm:ss').toString();
+  const date = body.date + ' 00:00:00';
 
   try {
     await pool.query(
@@ -215,7 +224,7 @@ app.post('/save_work_information', async (req, res) => {
       [
         timestamp,
         body.workLocation.location_id,
-        body.date,
+        date,
         body.isOutside,
         body.isWelding,
         body.isScaffolding,

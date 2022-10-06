@@ -9,7 +9,7 @@ module.exports = new EntitySchema({
       generated: true,
     },
     created_at: {
-      type: 'time without time zone',
+      type: 'timestamp without time zone',
       default: 'now()',
     },
     latitude: {

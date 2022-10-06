@@ -9,14 +9,14 @@ module.exports = new EntitySchema({
       type: 'int4',
     },
     created_at: {
-      type: 'time without time zone',
+      type: 'timestamp without time zone',
       default: 'now()',
     },
     location_id: {
       type: 'int4',
     },
     date: {
-      type: 'time without time zone',
+      type: 'timestamp without time zone',
     },
     is_outside: {
       type: 'boolean',
@@ -24,8 +24,9 @@ module.exports = new EntitySchema({
     is_welding: {
       type: 'boolean',
     },
-    is_outside: {
+    is_scaffolding: {
       type: 'boolean',
+      default: false,
     },
     work_details: {
       type: 'varchar',

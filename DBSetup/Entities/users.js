@@ -27,6 +27,7 @@ module.exports = new EntitySchema({
     },
     last_login_attempt: {
       type: 'timestamp without time zone',
+      nullable: true,
     },
   },
 });
