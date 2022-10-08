@@ -12,7 +12,7 @@ module.exports = new EntitySchema({
       type: 'timestamp without time zone',
       default: 'now()',
     },
-    darkMode_on: {
+    darkmode_on: {
       type: 'boolean',
     },
     email_notifications: {
@@ -21,6 +21,12 @@ module.exports = new EntitySchema({
     measurement_unit: {
       type: 'varchar',
       precision: 255,
+    },
+    precip_limit: {
+      type: 'float8',
+    },
+    wind_limit: {
+      type: 'float8',
     },
     user_id: {
       type: 'int4',

@@ -21,7 +21,7 @@
     "jsonwebtoken": "^8.5.1",
     "node-cron": "^3.0.2",
     "pg": "^8.7.3",
-    "typeorm": "^0.3.10"
+    "typeorm": "^0.3.0-rc.41"
   },
   "devDependencies": {
     "nodemon": "^2.0.18"
