@@ -111,9 +111,15 @@ app.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     pool.query(
       `INSERT INTO users (username, email, password, created_on) VALUES ($1, $2, $3, $4)`,
-      [username, email, hashedPassword, timestamp]
+      [username, email, hashedPassword, timestamp],
+      async (err) => {
+        if (err) {
+          res.send({ message: 'registration failed', status: true });
+        } else {
+          res.send({ message: 'registration successful', status: false });
+        }
+      }
     );
-    res.send({ message: 'registration successful' });
   } catch (err) {
     res.status(500).send({ message: 'oops, something went wrong' });
     console.log(err);
@@ -121,7 +127,11 @@ app.post('/register', async (req, res) => {
 });
 
 const verifyPassword = async (givenPassword, storedPassword) => {
-  await bcrypt.compare(storedPassword, givenPassword);
+  if (await bcrypt.compare(storedPassword, givenPassword)) {
+    return true;
+  } else {
+    return false;
+  }
 };
 
 app.post('/login', async (req, res) => {
@@ -134,10 +144,8 @@ app.post('/login', async (req, res) => {
     async (err, result) => {
       const userInfo = result.rows.find((body) => body.username === username);
       try {
-        if (!userInfo) {
-          res.status(401).send();
-        } else {
-          if (verifyPassword(password, userInfo.password)) {
+        if (userInfo) {
+          if (await verifyPassword(userInfo.password, password)) {
             const jwtPayload = {
               username: userInfo.username,
               user_id: userInfo.user_id,
@@ -154,14 +162,26 @@ app.post('/login', async (req, res) => {
               auth: true,
               last_login_attempt: timestamp,
               token: token,
+              credentialsNotMatch: false,
+              userNotFound: false,
+              loginMessageModal: false,
             });
+            await updateLastLoginAttempt(pool, timestamp, username);
           } else {
             res.send({
-              massage: 'wrong username and password combination',
+              message: 'wrong username and password combination',
               auth: false,
-              last_login_attempt: timestamp,
+              userNotFound: false,
+              loginMessageModal: true,
             });
           }
+        } else {
+          res.send({
+            message: 'user not found',
+            auth: false,
+            userNotFound: true,
+            loginMessageModal: true,
+          });
         }
       } catch (err) {
         console.log(err);
@@ -169,7 +189,6 @@ app.post('/login', async (req, res) => {
       }
     }
   );
-  updateLastLoginAttempt(pool, timestamp, username);
 });
 
 const verifyToken = (req, res, next) => {
