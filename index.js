@@ -8,12 +8,13 @@ const { Pool } = require('pg');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const deleteRow = require('./utilFunc/deleteRow');
 const checkForSavedData = require('./utilFunc/checkForSavedData');
 const emailAlert = require('./utilFunc/emailAlert');
-const updateLastLoginAttempt = require('./utilFunc/updateLastLogin');
+const locationIsSaved = require('./utilFunc/locationIsSaved');
+const storeUserCredentials = require('./authenticationFunc/storeUserCredentials');
+const verifyToken = require('./authenticationFunc/verifyToken');
+const attemptLogin = require('./authenticationFunc/attemptLogin');
 const cron = require('node-cron');
 
 const corsOptions = {
@@ -44,37 +45,12 @@ app.listen(PORT, () => {
 const lang = 'en';
 const key = process.env.API_KEY;
 
-const locationIsSaved = async (user_id, lon, lat) => {
-  const response = await pool.query(
-    'SELECT latitude, longitude FROM work_locations WHERE user_id = $1',
-    [user_id]
-  );
-  const checkLat = async (coordinate) => {
-    if ((await coordinate.latitude) == lat) {
-      return true;
-    }
-    return false;
-  };
-
-  const checkLon = async (coordinate) => {
-    if ((await coordinate.longitude) == lon) {
-      return true;
-    }
-    return false;
-  };
-  if (response.rows.some(checkLat) && response.rows.some(checkLon)) {
-    return true;
-  } else {
-    false;
-  }
-};
-
 app.post('/save_location', async (req, res) => {
   const body = req.body;
   try {
     if (
       (await checkForSavedData(body.user_id, pool, 'work_locations')) &&
-      (await locationIsSaved(body.user_id, body.longitude, body.latitude))
+      (await locationIsSaved(pool, body.user_id, body.longitude, body.latitude))
     ) {
       res.send({ message: 'location already saved' });
     } else {
@@ -106,106 +82,23 @@ app.post('/register', async (req, res) => {
   const password = req.body.password;
   const email = req.body.email;
   const timestamp = dayjs.utc().format('YYYY-MM-DD HH:mm:ss').toString();
-
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    pool.query(
-      `INSERT INTO users (username, email, password, created_on) VALUES ($1, $2, $3, $4)`,
-      [username, email, hashedPassword, timestamp],
-      async (err) => {
-        if (err) {
-          res.send({ message: 'registration failed', status: true });
-        } else {
-          res.send({ message: 'registration successful', status: false });
-        }
-      }
-    );
+    storeUserCredentials(pool, username, password, email, timestamp, res);
   } catch (err) {
     res.status(500).send({ message: 'oops, something went wrong' });
     console.log(err);
   }
 });
 
-const verifyPassword = async (givenPassword, storedPassword) => {
-  if (await bcrypt.compare(storedPassword, givenPassword)) {
-    return true;
-  } else {
-    return false;
-  }
-};
-
 app.post('/login', async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
   const timestamp = dayjs.utc().format('YYYY-MM-DD HH:mm:ss').toString();
 
-  pool.query(
-    'SELECT user_id, username, password FROM users',
-    async (err, result) => {
-      const userInfo = result.rows.find((body) => body.username === username);
-      try {
-        if (userInfo) {
-          if (await verifyPassword(userInfo.password, password)) {
-            const jwtPayload = {
-              username: userInfo.username,
-              user_id: userInfo.user_id,
-            };
-            const token = jwt.sign(
-              jwtPayload,
-              process.env.ACCESS_TOKEN_SECRET,
-              {
-                expiresIn: '30m',
-              }
-            );
-            res.json({
-              message: 'login successful',
-              auth: true,
-              last_login_attempt: timestamp,
-              token: token,
-              credentialsNotMatch: false,
-              userNotFound: false,
-              loginMessageModal: false,
-            });
-            await updateLastLoginAttempt(pool, timestamp, username);
-          } else {
-            res.send({
-              message: 'wrong username and password combination',
-              auth: false,
-              userNotFound: false,
-              loginMessageModal: true,
-            });
-          }
-        } else {
-          res.send({
-            message: 'user not found',
-            auth: false,
-            userNotFound: true,
-            loginMessageModal: true,
-          });
-        }
-      } catch (err) {
-        console.log(err);
-        res.status(500).send();
-      }
-    }
+  pool.query('SELECT user_id, username, password FROM users', (err, result) =>
+    attemptLogin(err, result, username, password, timestamp, res, pool)
   );
 });
-
-const verifyToken = (req, res, next) => {
-  const token = req.headers['x-access-token'];
-  if (!token) {
-    res.send({ message: 'no authorization token found' });
-  } else {
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-      if (err) {
-        res.send({ auth: false, message: 'failed to authenticate' });
-      } else {
-        req.userId = decoded;
-        next();
-      }
-    });
-  }
-};
 
 app.get('/auth_check', verifyToken, (req, res) => {
   res.send({
