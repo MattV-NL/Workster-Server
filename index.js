@@ -95,8 +95,10 @@ app.post('/login', async (req, res) => {
   const password = req.body.password;
   const timestamp = dayjs.utc().format('YYYY-MM-DD HH:mm:ss').toString();
 
-  pool.query('SELECT user_id, username, password FROM users', (err, result) =>
-    attemptLogin(err, result, username, password, timestamp, res, pool)
+  pool.query(
+    'SELECT user_id, username, password FROM users',
+    async (err, result) =>
+      await attemptLogin(err, result, username, password, timestamp, res, pool)
   );
 });
 
