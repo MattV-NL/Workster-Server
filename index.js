@@ -32,6 +32,8 @@ const pool = new Pool({
   idleTimeoutMillis: 0,
 });
 
+// remove cron to demo email
+
 cron.schedule('0 */3 * * *', () => {
   emailAlert(pool);
 });
