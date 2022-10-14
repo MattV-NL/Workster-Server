@@ -1,0 +1,45 @@
+.light-chart {
+  position: relative;
+  border: solid 0.125rem var(--darkBackground);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  width: 100%;
+}
+
+.light-chart-title {
+  display: flex;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.dark-chart {
+  position: relative;
+  border: solid 0.125rem #fff;
+  background-color: var(--componentBackground);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  width: 100%;
+}
+
+.dark-chart-title {
+  display: flex;
+  justify-content: center;
+  font-size: 1.1rem;
+}
+
+.weather-chart-container {
+  display: grid;
+  grid-template-columns: [col1] 2rem [canvas] auto [col3] 2rem;
+  height: 20rem;
+}
+
+.chart-axis {
+  padding-top: 2.25rem;
+  margin-left: -1rem;
+}
+
+.chart-axis-label {
+  transform: rotate(270deg);
+  width: 10rem;
+  height: 10rem;
+}

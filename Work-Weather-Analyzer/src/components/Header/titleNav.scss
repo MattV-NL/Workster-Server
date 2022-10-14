@@ -1,0 +1,49 @@
+.ant-dropdown-trigger {
+  color: unset;
+}
+
+.header {
+  display: grid;
+  grid-template-rows: [first] fit-content [last] 2rem;
+}
+
+.title-container {
+  display: grid;
+  grid-template-columns: [first] 50% [last] 50%;
+  font-size: 1.5rem;
+
+  & .logo-container {
+    display: flex;
+    justify-content: flex-end;
+  }
+  & .logo {
+    width: 3rem;
+    height: 3rem;
+  }
+}
+
+.logged-in {
+  color: green;
+  font-weight: bolder;
+}
+
+.dark-menu-icon {
+  color: #fff;
+}
+
+.light-menu-icon {
+  color: #000;
+}
+
+.navbar {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+.dark-navbar-item {
+  color: #fff;
+}
+.light-navbar-item {
+  color: #000;
+}

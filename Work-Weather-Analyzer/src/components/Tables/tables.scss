@@ -1,0 +1,64 @@
+.light-table {
+  position: relative;
+  border: solid 0.125rem var(--darkBackground);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  width: 100%;
+  overflow-x: scroll;
+
+  & .ant-table-tbody,
+  .ant-table-thead > tr > th {
+    background-color: #fff;
+  }
+}
+
+.dark-table {
+  position: relative;
+  border: solid 0.125rem #fff;
+  background-color: var(--componentBackground);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  width: 100%;
+  padding: 0.5rem;
+  overflow-x: scroll;
+
+  & .ant-table-tbody,
+  .ant-table-thead > tr > th {
+    background-color: var(--componentBackground);
+  }
+}
+
+.light-weather-table {
+  position: relative;
+  border: solid 0.125rem var(--darkBackground);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  width: 100%;
+  overflow-x: scroll;
+
+  & .ant-table-tbody,
+  .ant-table-thead > tr > th {
+    background-color: #fff;
+    color: #000;
+  }
+}
+
+.dark-weather-table {
+  position: relative;
+  border: solid 0.125rem #fff;
+  background-color: var(--componentBackground);
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  width: 100%;
+  overflow-x: scroll;
+
+  & .ant-table-tbody,
+  .ant-table-thead > tr > th {
+    background-color: var(--componentBackground);
+    color: #fff;
+  }
+}
+
+.ant-table-thead {
+  font-size: 0.95rem;
+}
