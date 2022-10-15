@@ -37,6 +37,8 @@ const fetchWeatherAlert = async (lat, lon, unit, email, username) => {
     //   },
     // ];
 
+    // comment out during demo
+
     if (response.data.alerts) {
       response.data.alerts.forEach(async (alert) => {
         await client.send({
@@ -62,6 +64,31 @@ const fetchWeatherAlert = async (lat, lon, unit, email, username) => {
         });
       });
     } else {
+      // if (demoAlert) {
+      //   sampleAlert.forEach(async (alert) => {
+      //     await client.send({
+      //       // hard code an email for demo purposes
+      //       to: {
+      //         email,
+      //         name: username,
+      //       },
+      //       from: {
+      //         email: process.env.SENDGRID_SENDER_EMAIL,
+      //         name: 'Work Weather Analyzer App',
+      //       },
+      //       templateId: 'd-d06dbfc9133c4df8b853f49af35dea6e',
+
+      //       dynamicTemplateData: {
+      //         sender_name: alert.sender_name,
+      //         event: alert.event,
+      //         start: millisToDate(alert.start),
+      //         end: millisToDate(alert.end),
+      //         alert: alert.description,
+      //         tag: alert.tags,
+      //       },
+      //     });
+      //   });
+      // } else {
       console.log('no active weather alerts');
       return true;
     }
