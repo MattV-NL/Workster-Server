@@ -8,12 +8,13 @@ const { Pool } = require('pg');
 const dayjs = require('dayjs');
 const utc = require('dayjs/plugin/utc');
 dayjs.extend(utc);
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
 const deleteRow = require('./utilFunc/deleteRow');
 const checkForSavedData = require('./utilFunc/checkForSavedData');
 const emailAlert = require('./utilFunc/emailAlert');
-const updateLastLoginAttempt = require('./utilFunc/updateLastLogin');
+const locationIsSaved = require('./utilFunc/locationIsSaved');
+const storeUserCredentials = require('./authenticationFunc/storeUserCredentials');
+const verifyToken = require('./authenticationFunc/verifyToken');
+const attemptLogin = require('./authenticationFunc/attemptLogin');
 const cron = require('node-cron');
 
 const corsOptions = {
@@ -21,15 +22,17 @@ const corsOptions = {
 };
 
 const pool = new Pool({
-  host: 'localhost',
-  user: 'postgres',
+  host: process.env.POSTGRES_SERVER || 'localhost',
+  user: process.env.POSTGRES_USER_DATABASE,
   port: 5432,
   password: process.env.POSTGRES_PW,
-  database: 'wwadb',
+  database: process.env.POSTGRES_USER_DATABASE,
   max: 10,
   connectionTimeoutMillis: 0,
   idleTimeoutMillis: 0,
 });
+
+// remove cron to demo email
 
 cron.schedule('0 */3 * * *', () => {
   emailAlert(pool);
@@ -44,37 +47,12 @@ app.listen(PORT, () => {
 const lang = 'en';
 const key = process.env.API_KEY;
 
-const locationIsSaved = async (user_id, lon, lat) => {
-  const response = await pool.query(
-    'SELECT latitude, longitude FROM work_locations WHERE user_id = $1',
-    [user_id]
-  );
-  const checkLat = async (coordinate) => {
-    if ((await coordinate.latitude) == lat) {
-      return true;
-    }
-    return false;
-  };
-
-  const checkLon = async (coordinate) => {
-    if ((await coordinate.longitude) == lon) {
-      return true;
-    }
-    return false;
-  };
-  if (response.rows.some(checkLat) && response.rows.some(checkLon)) {
-    return true;
-  } else {
-    false;
-  }
-};
-
 app.post('/save_location', async (req, res) => {
   const body = req.body;
   try {
     if (
       (await checkForSavedData(body.user_id, pool, 'work_locations')) &&
-      (await locationIsSaved(body.user_id, body.longitude, body.latitude))
+      (await locationIsSaved(pool, body.user_id, body.longitude, body.latitude))
     ) {
       res.send({ message: 'location already saved' });
     } else {
@@ -90,7 +68,7 @@ app.post('/save_location', async (req, res) => {
   }
 });
 
-app.get('/api/weather/:latlonunits', async (req, resp) => {
+app.get('/api/weather/:latlonunits', async (req, res) => {
   const latlonunits = req.params.latlonunits.split(',');
   const lat = latlonunits[0];
   const lon = latlonunits[1];
@@ -98,7 +76,7 @@ app.get('/api/weather/:latlonunits', async (req, resp) => {
   const response = await axios.get(
     `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${key}&units=${units}&lang${lang}`
   );
-  resp.send(response.data);
+  res.send(response.data);
 });
 
 app.post('/register', async (req, res) => {
@@ -106,23 +84,13 @@ app.post('/register', async (req, res) => {
   const password = req.body.password;
   const email = req.body.email;
   const timestamp = dayjs.utc().format('YYYY-MM-DD HH:mm:ss').toString();
-
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    pool.query(
-      `INSERT INTO users (username, email, password, created_on) VALUES ($1, $2, $3, $4)`,
-      [username, email, hashedPassword, timestamp]
-    );
-    res.send({ message: 'registration successful' });
+    storeUserCredentials(pool, username, password, email, timestamp, res);
   } catch (err) {
     res.status(500).send({ message: 'oops, something went wrong' });
     console.log(err);
   }
 });
-
-const verifyPassword = async (givenPassword, storedPassword) => {
-  await bcrypt.compare(storedPassword, givenPassword);
-};
 
 app.post('/login', async (req, res) => {
   const username = req.body.username;
@@ -131,54 +99,10 @@ app.post('/login', async (req, res) => {
 
   pool.query(
     'SELECT user_id, username, password FROM users',
-    async (err, result) => {
-      const userInfo = result.rows.find((body) => body.username === username);
-      try {
-        if (verifyPassword(password, userInfo.password)) {
-          const jwtPayload = {
-            username: userInfo.username,
-            user_id: userInfo.user_id,
-          };
-          const token = jwt.sign(jwtPayload, process.env.ACCESS_TOKEN_SECRET, {
-            expiresIn: '30m',
-          });
-          res.json({
-            message: 'login successful',
-            auth: true,
-            last_login_attempt: timestamp,
-            token: token,
-          });
-        } else {
-          res.send({
-            massage: 'wrong username and password combination',
-            auth: false,
-            last_login_attempt: timestamp,
-          });
-        }
-      } catch (err) {
-        console.log(err);
-        res.status(500).send();
-      }
-    }
+    async (err, result) =>
+      await attemptLogin(err, result, username, password, timestamp, res, pool)
   );
-  updateLastLoginAttempt(pool, timestamp, username);
 });
-
-const verifyToken = (req, res, next) => {
-  const token = req.headers['x-access-token'];
-  if (!token) {
-    res.send({ message: 'no authorization token found' });
-  } else {
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
-      if (err) {
-        res.send({ auth: false, message: 'failed to authenticate' });
-      } else {
-        req.userId = decoded;
-        next();
-      }
-    });
-  }
-};
 
 app.get('/auth_check', verifyToken, (req, res) => {
   res.send({
@@ -208,6 +132,7 @@ app.post('/get_locations', async (req, res) => {
 app.post('/save_work_information', async (req, res) => {
   const body = req.body;
   const timestamp = dayjs.utc().format('YYYY-MM-DD HH:mm:ss').toString();
+  const date = body.date + ' 00:00:00';
 
   try {
     await pool.query(
@@ -215,7 +140,7 @@ app.post('/save_work_information', async (req, res) => {
       [
         timestamp,
         body.workLocation.location_id,
-        body.date,
+        date,
         body.isOutside,
         body.isWelding,
         body.isScaffolding,
@@ -257,20 +182,35 @@ app.post('/save_settings', async (req, res) => {
   const units = settings.units;
   const user_id = settings.user_id;
   const email_notifications = settings.emailNotifications;
-
+  const precip_limit = settings.precipConflict;
+  const wind_limit = settings.windConflict;
   try {
     if (await checkForSavedData(user_id, pool, 'user_settings')) {
       await pool.query(
-        'UPDATE user_settings SET darkmode_on = $1, measurement_unit = $2, email_notifications = $3 WHERE user_id = $4',
-        [darkMode, units, email_notifications, user_id]
+        'UPDATE user_settings SET darkmode_on = $1, measurement_unit = $2, email_notifications = $3, precip_limit = $4, wind_limit = $5 WHERE user_id = $6',
+        [
+          darkMode,
+          units,
+          email_notifications,
+          precip_limit,
+          wind_limit,
+          user_id,
+        ]
       );
       res.send({
         message: 'settings updated',
       });
     } else {
       await pool.query(
-        'INSERT into user_settings (darkmode_on, measurement_unit, email_notifications, user_id) VALUES ($1, $2, $3, $4)',
-        [darkMode, units, email_notifications, user_id]
+        'INSERT into user_settings (darkmode_on, measurement_unit, email_notifications, precip_limit, wind_limit, user_id) VALUES ($1, $2, $3, $4, $5, $6)',
+        [
+          darkMode,
+          units,
+          email_notifications,
+          precip_limit,
+          wind_limit,
+          user_id,
+        ]
       );
       res.send({
         message: 'settings save to db',
@@ -290,7 +230,7 @@ app.post('/get_settings', async (req, res) => {
   try {
     if (await checkForSavedData(user_id, pool, 'user_settings')) {
       const settings = await pool.query(
-        'SELECT darkmode_on, measurement_unit, email_notifications FROM user_settings WHERE user_id = $1',
+        'SELECT darkmode_on, measurement_unit, email_notifications, precip_limit, wind_limit FROM user_settings WHERE user_id = $1',
         [user_id]
       );
       res.send(settings.rows);
@@ -300,6 +240,8 @@ app.post('/get_settings', async (req, res) => {
           darkmode_on: true,
           measurement_unit: 'metric',
           email_notifications: false,
+          precip_limit: 20,
+          wind_limit: 30,
         },
       ];
       res.send(defaultResponse);
