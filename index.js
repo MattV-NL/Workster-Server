@@ -16,6 +16,7 @@ const storeUserCredentials = require('./authenticationFunc/storeUserCredentials'
 const verifyToken = require('./authenticationFunc/verifyToken');
 const attemptLogin = require('./authenticationFunc/attemptLogin');
 const cron = require('node-cron');
+const path = require('path');
 
 const corsOptions = {
   origin: 'http://localhost:3000',
@@ -38,6 +39,10 @@ cron.schedule('0 */3 * * *', () => {
   emailAlert(pool);
 });
 
+const static_dir = path.resolve(
+  path.join(__dirname, '../Work-Weather-Analyzer/build')
+);
+app.use('/', express.static(static_dir));
 app.use(cors(corsOptions));
 app.use(express.json());
 app.listen(PORT, () => {
