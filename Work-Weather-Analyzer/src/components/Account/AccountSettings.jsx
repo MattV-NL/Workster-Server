@@ -19,8 +19,6 @@ const AccountSettings = () => {
     setEmailNotifications,
     units,
     setUnits,
-    windConflict,
-    setWindConflict,
   } = useContext(UserSettingsContext);
 
   return (
