@@ -8,15 +8,22 @@ import { useCallback, useContext } from 'react';
 
 const SaveSettingsButton = () => {
   const { authStatus } = useContext(AuthenticationContext);
-  const { darkMode, units, emailNotifications, precipConflict, windConflict } =
-    useContext(UserSettingsContext);
+  const {
+    darkMode,
+    units,
+    emailNotifications,
+    rainConflict,
+    snowConflict,
+    windConflict,
+  } = useContext(UserSettingsContext);
 
   const sendSettingInformation = useCallback(async () => {
     const settingsJSON = {
       darkMode,
       units,
       emailNotifications,
-      precipConflict,
+      rainConflict,
+      snowConflict,
       windConflict,
       user_id: authStatus.user_id,
     };
@@ -34,7 +41,8 @@ const SaveSettingsButton = () => {
     authStatus,
     units,
     emailNotifications,
-    precipConflict,
+    rainConflict,
+    snowConflict,
     windConflict,
   ]);
 

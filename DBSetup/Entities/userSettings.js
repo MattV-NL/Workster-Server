@@ -22,7 +22,10 @@ module.exports = new EntitySchema({
       type: 'varchar',
       precision: 255,
     },
-    precip_limit: {
+    rain_limit: {
+      type: 'float8',
+    },
+    snow_limit: {
       type: 'float8',
     },
     wind_limit: {

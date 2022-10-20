@@ -187,17 +187,19 @@ app.post('/save_settings', async (req, res) => {
   const units = settings.units;
   const user_id = settings.user_id;
   const email_notifications = settings.emailNotifications;
-  const precip_limit = settings.precipConflict;
+  const rain_limit = settings.rainConflict;
+  const snow_limit = settings.snowConflict;
   const wind_limit = settings.windConflict;
   try {
     if (await checkForSavedData(user_id, pool, 'user_settings')) {
       await pool.query(
-        'UPDATE user_settings SET darkmode_on = $1, measurement_unit = $2, email_notifications = $3, precip_limit = $4, wind_limit = $5 WHERE user_id = $6',
+        'UPDATE user_settings SET darkmode_on = $1, measurement_unit = $2, email_notifications = $3, rain_limit = $4, snow_limit = $5, wind_limit = $6 WHERE user_id = $7',
         [
           darkMode,
           units,
           email_notifications,
-          precip_limit,
+          rain_limit,
+          snow_limit,
           wind_limit,
           user_id,
         ]
@@ -207,12 +209,13 @@ app.post('/save_settings', async (req, res) => {
       });
     } else {
       await pool.query(
-        'INSERT into user_settings (darkmode_on, measurement_unit, email_notifications, precip_limit, wind_limit, user_id) VALUES ($1, $2, $3, $4, $5, $6)',
+        'INSERT into user_settings (darkmode_on, measurement_unit, email_notifications, rain_limit, snow_limit, wind_limit, user_id) VALUES ($1, $2, $3, $4, $5, $6, $7)',
         [
           darkMode,
           units,
           email_notifications,
-          precip_limit,
+          rain_limit,
+          snow_limit,
           wind_limit,
           user_id,
         ]
@@ -235,7 +238,7 @@ app.post('/get_settings', async (req, res) => {
   try {
     if (await checkForSavedData(user_id, pool, 'user_settings')) {
       const settings = await pool.query(
-        'SELECT darkmode_on, measurement_unit, email_notifications, precip_limit, wind_limit FROM user_settings WHERE user_id = $1',
+        'SELECT darkmode_on, measurement_unit, email_notifications, rain_limit, snow_limit wind_limit FROM user_settings WHERE user_id = $1',
         [user_id]
       );
       res.send(settings.rows);
@@ -245,7 +248,8 @@ app.post('/get_settings', async (req, res) => {
           darkmode_on: true,
           measurement_unit: 'metric',
           email_notifications: false,
-          precip_limit: 20,
+          rain_limit: 20,
+          snow_limit: 20,
           wind_limit: 30,
         },
       ];

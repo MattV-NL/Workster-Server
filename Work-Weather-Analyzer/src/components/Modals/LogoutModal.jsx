@@ -4,8 +4,13 @@ import { Modal } from 'antd';
 import { UserSettingsContext } from '../../contexts/UserSettingsContext';
 
 const LogoutModal = () => {
-  const { setDarkMode, setPrecipConflict, setWindConflict, setUnits } =
-    useContext(UserSettingsContext);
+  const {
+    setDarkMode,
+    setRainConflict,
+    setSnowConflict,
+    setWindConflict,
+    setUnits,
+  } = useContext(UserSettingsContext);
   const { setAuthStatus, logoutModalVisible, setLogoutModalVisible } =
     useContext(AuthenticationContext);
 
@@ -16,7 +21,8 @@ const LogoutModal = () => {
       message: 'logged out',
     });
     setDarkMode(true);
-    setPrecipConflict(20);
+    setRainConflict(20);
+    setSnowConflict(20);
     setWindConflict(30);
     setUnits('metric');
     setLogoutModalVisible(false);
@@ -24,7 +30,8 @@ const LogoutModal = () => {
     setAuthStatus,
     setLogoutModalVisible,
     setDarkMode,
-    setPrecipConflict,
+    setRainConflict,
+    setSnowConflict,
     setWindConflict,
     setUnits,
   ]);

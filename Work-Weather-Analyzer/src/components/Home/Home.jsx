@@ -12,7 +12,8 @@ const Home = () => {
     setDarkMode,
     setUnits,
     setEmailNotifications,
-    setPrecipConflict,
+    setRainConflict,
+    setSnowConflict,
     setWindConflict,
   } = useContext(UserSettingsContext);
 
@@ -30,7 +31,8 @@ const Home = () => {
         setDarkMode,
         setUnits,
         setEmailNotifications,
-        setPrecipConflict,
+        setRainConflict,
+        setSnowConflict,
         setWindConflict
       );
     };
@@ -40,7 +42,8 @@ const Home = () => {
     setDarkMode,
     setUnits,
     setEmailNotifications,
-    setPrecipConflict,
+    setRainConflict,
+    setSnowConflict,
     setWindConflict,
   ]);
 
