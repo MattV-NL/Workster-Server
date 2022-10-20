@@ -5,7 +5,8 @@ export const getSettings = async (
   setDarkMode,
   setUnits,
   setEmailNotifications,
-  setPrecipConlict,
+  setRainConlict,
+  setSnowConflict,
   setWindConflict
 ) => {
   if (await authStatus.auth) {
@@ -20,7 +21,8 @@ export const getSettings = async (
     setDarkMode(returnedData[0].darkmode_on);
     setUnits(returnedData[0].measurement_unit);
     setEmailNotifications(returnedData[0].email_notifications);
-    setPrecipConlict(returnedData[0].precip_limit);
+    setRainConlict(returnedData[0].rain_limit);
+    setSnowConflict(returnedData[0].snow_limit);
     setWindConflict(returnedData[0].wind_limit);
   } else {
     return;
