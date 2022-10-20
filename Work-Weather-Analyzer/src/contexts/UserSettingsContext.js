@@ -5,7 +5,8 @@ export const UserSettingsContext = createContext();
 const UserSettingsContextProvider = ({ children }) => {
   const [darkMode, setDarkMode] = useState(true);
   const [emailNotifications, setEmailNotifications] = useState(false);
-  const [precipConflict, setPrecipConflict] = useState(20);
+  const [rainConflict, setRainConflict] = useState(20);
+  const [snowConflict, setSnowConflict] = useState(20);
   const [windConflict, setWindConflict] = useState(30);
   const [units, setUnits] = useState('metric');
   // metric - m/s & degrees C
@@ -22,8 +23,10 @@ const UserSettingsContextProvider = ({ children }) => {
         setEmailNotifications,
         windConflict,
         setWindConflict,
-        precipConflict,
-        setPrecipConflict,
+        rainConflict,
+        setRainConflict,
+        snowConflict,
+        setSnowConflict,
       }}
     >
       {children}

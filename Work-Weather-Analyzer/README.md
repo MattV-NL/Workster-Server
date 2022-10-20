@@ -14,7 +14,6 @@ I chose to build this project as I was working throughout the winter outside in 
 
 ## Running the App
 
-To check it out for yourself you can click this link:
-https://mattv-nl.github.io/Work-Weather-Analyzer/
+this project is not running quite yet as I am working on building the back end as well. I will update when that is complete.
 
-I hope you enjoy!
+this is a test2

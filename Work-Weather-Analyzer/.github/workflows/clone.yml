@@ -1,0 +1,21 @@
+name: Clone
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Clone repo to backend
+        run: |
+          npm run build
+          cd ..\WWA-Server\
+          git clone https://github.com/MattV-NL/Work-Weather-Analyzer.git
+      - name: Remove extra .git
+        run: |
+          cd \Work-Weather-Analyzer\
+          rm .git && cd ..

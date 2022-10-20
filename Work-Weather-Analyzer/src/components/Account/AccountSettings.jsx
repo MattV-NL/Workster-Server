@@ -7,7 +7,8 @@ import DarkMode from '../Settings/DarkMode';
 import Units from '../Settings/Units';
 import EmailNotifications from '../Settings/EmailNotifications';
 import { onChange } from '../../restAPI/onChange';
-import PrecipConflict from '../Settings/PrecipConflict';
+import RainConflict from '../Settings/RainConflict';
+import SnowConflict from '../Settings/SnowConflict';
 import WindConflict from '../Settings/WindConflict';
 
 const AccountSettings = () => {
@@ -44,7 +45,8 @@ const AccountSettings = () => {
             isBoolean: true,
           })}
         />
-        <PrecipConflict />
+        <RainConflict />
+        <SnowConflict />
         <WindConflict />
         <SaveSettingsButton />
       </div>
