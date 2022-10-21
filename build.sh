@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
 cd Work-Weather-Analyzer
-npm install
+npm install --production
 npm run build
 cd ..
