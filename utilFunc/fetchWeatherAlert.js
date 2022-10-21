@@ -3,6 +3,8 @@ const axios = require('axios');
 const client = require('@sendgrid/mail');
 client.setApiKey(process.env.SENDGRID_API_KEY);
 
+console.log(process.env.SENDGRID_API_KEY);
+
 const key = process.env.API_KEY;
 const lang = 'en';
 
