@@ -1,9 +1,9 @@
-require('dotenv').config();
+// require('dotenv').config();
+const dotenv = require('dotenv');
 const axios = require('axios');
+dotenv.config({ path: '../.env' });
 const client = require('@sendgrid/mail');
 client.setApiKey(process.env.SENDGRID_API_KEY);
-
-console.log(process.env.SENDGRID_API_KEY);
 
 const key = process.env.API_KEY;
 const lang = 'en';
