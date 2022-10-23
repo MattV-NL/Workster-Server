@@ -49,12 +49,6 @@ app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
 });
 
-app.get('/', (req, res) => {
-  res.sendFile(
-    path.join(__dirname, '../Work-Weather-Analyzer/build', 'index.html')
-  );
-});
-
 const lang = 'en';
 const key = process.env.API_KEY;
 
