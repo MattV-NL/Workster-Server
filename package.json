@@ -5,9 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "devStart": "nodemon index.js",
-    "prebuild": "chmod 777 build.sh",
-    "build": "./build.sh"
+    "devStart": "nodemon index.js"
   },
   "keywords": [],
   "author": "",
