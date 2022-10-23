@@ -39,14 +39,20 @@ cron.schedule('0 */3 * * *', () => {
   emailAlert(pool);
 });
 
-const static_dir = path.resolve(
-  path.join(__dirname, '../Work-Weather-Analyzer/build')
-);
-app.use('/', express.static(static_dir));
+// const static_dir = path.resolve(
+//   path.join(__dirname, '../Work-Weather-Analyzer/build')
+// );
+app.use(express.static(path.join(__dirname, '../Work-Weather-Analyzer/build')));
 app.use(cors(corsOptions));
 app.use(express.json());
 app.listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
+});
+
+app.get('/', (req, res) => {
+  res.sendFile(
+    path.join(__dirname, '../Work-Weather-Analyzer/build', 'index.html')
+  );
 });
 
 const lang = 'en';
