@@ -56,13 +56,13 @@ const httpsOptions = {
   key: fs.readFileSync(path.join(keyPath)),
 };
 
-// https.createServer(httpsOptions, app).listen(PORT, () => {
-//   console.log(`Server listening on ${PORT}`);
-// });
-
-app.listen(PORT, () => {
+https.createServer(httpsOptions, app).listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
 });
+
+// app.listen(PORT, () => {
+//   console.log(`Server listening on ${PORT}`);
+// });
 
 const lang = 'en';
 const key = process.env.API_KEY;
