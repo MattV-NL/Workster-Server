@@ -48,21 +48,21 @@ app.use('/', express.static(static_dir));
 app.use(cors(corsOptions));
 app.use(express.json());
 
-const certPath = '../../../etc/letsencrypt/workster.app/fullchain.pem';
-const keyPath = '../../../etc/letsencrypt/workster.app/privkey.pem';
+const certPath = '/etc/letsencrypt/live/workster.app/fullchain.pem';
+const keyPath = '/etc/letsencrypt/live/workster.app/privkey.pem';
 
 const httpsOptions = {
-  cert: fs.readFileSync(path.join(__dirname, certPath)),
-  key: fs.readFileSync(path.join(__dirname, keyPath)),
+  cert: fs.readFileSync(path.join(certPath)),
+  key: fs.readFileSync(path.join(keyPath)),
 };
 
-https.createServer(httpsOptions, app).listen(PORT, () => {
-  console.log(`Server listening on ${PORT}`);
-});
-
-// app.listen(PORT, () => {
+// https.createServer(httpsOptions, app).listen(PORT, () => {
 //   console.log(`Server listening on ${PORT}`);
 // });
+
+app.listen(PORT, () => {
+  console.log(`Server listening on ${PORT}`);
+});
 
 const lang = 'en';
 const key = process.env.API_KEY;
