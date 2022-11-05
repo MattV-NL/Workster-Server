@@ -1,4 +1,7 @@
 const express = require('express');
+const path = require('path');
+const fs = require('fs');
+const https = require('https');
 const app = express();
 const PORT = process.env.PORT || 8000;
 const axios = require('axios');
@@ -16,7 +19,6 @@ const storeUserCredentials = require('./authenticationFunc/storeUserCredentials'
 const verifyToken = require('./authenticationFunc/verifyToken');
 const attemptLogin = require('./authenticationFunc/attemptLogin');
 const cron = require('node-cron');
-const path = require('path');
 
 const corsOptions = {
   origin: 'http://localhost:3000',
@@ -45,9 +47,22 @@ const static_dir = path.resolve(
 app.use('/', express.static(static_dir));
 app.use(cors(corsOptions));
 app.use(express.json());
-app.listen(PORT, () => {
+
+const certPath = '../../../etc/letsencrypt/workster.app/fullchain.pem';
+const keyPath = '../../../etc/letsencrypt/workster.app/privkey.pem';
+
+const httpsOptions = {
+  cert: fs.readFileSync(certPath),
+  key: fs.readFileSync(keyPath),
+};
+
+https.createServer(httpsOptions, app).listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
 });
+
+// app.listen(PORT, () => {
+//   console.log(`Server listening on ${PORT}`);
+// });
 
 const lang = 'en';
 const key = process.env.API_KEY;
