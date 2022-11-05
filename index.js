@@ -52,8 +52,8 @@ const certPath = '../../../etc/letsencrypt/workster.app/fullchain.pem';
 const keyPath = '../../../etc/letsencrypt/workster.app/privkey.pem';
 
 const httpsOptions = {
-  cert: fs.readFileSync(certPath),
-  key: fs.readFileSync(keyPath),
+  cert: fs.readFileSync(path.join(__dirname, certPath)),
+  key: fs.readFileSync(path.join(__dirname, keyPath)),
 };
 
 https.createServer(httpsOptions, app).listen(PORT, () => {
