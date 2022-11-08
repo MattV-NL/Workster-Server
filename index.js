@@ -67,13 +67,6 @@ https.createServer(httpsOptions, app).listen(PORT, () => {
 const lang = 'en';
 const key = process.env.API_KEY;
 
-app.get('/*', (req, res) => {
-  res.sendFile(
-    path.join(__dirname, '../Workster-Client/build/index.html'),
-    (err) => err && res.status(500).send(err)
-  );
-});
-
 app.post('/save_location', async (req, res) => {
   const body = req.body;
   try {
