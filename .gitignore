@@ -3,3 +3,4 @@
 
 # Ignore .env
 .env
+env.sh
