@@ -52,7 +52,6 @@ app.use(express.json());
 // since cert is on VM
 const certPath = '/etc/letsencrypt/live/workster.app/fullchain.pem';
 const keyPath = '/etc/letsencrypt/live/workster.app/privkey.pem';
-const homePath = '/srv/workster/Workster-Client/build/index.html';
 const httpsOptions = {
   cert: fs.readFileSync(certPath),
   key: fs.readFileSync(keyPath),
@@ -69,7 +68,10 @@ const lang = 'en';
 const key = process.env.API_KEY;
 
 app.get('/*', (req, res) => {
-  res.sendFile(fs.readFileSync(homePath));
+  res.sendFile(
+    path.join(__dirname, '../Workster-Client/build/index.html'),
+    (err) => err && res.status(500).send(err)
+  );
 });
 
 app.post('/save_location', async (req, res) => {
