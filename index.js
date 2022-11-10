@@ -51,15 +51,15 @@ app.use(express.json());
 
 // commented out for dev environment
 // since cert is on VM
-// const certPath = '/etc/letsencrypt/live/workster.app/fullchain.pem';
-// const keyPath = '/etc/letsencrypt/live/workster.app/privkey.pem';
-// const httpsOptions = {
-//   cert: fs.readFileSync(certPath),
-//   key: fs.readFileSync(keyPath),
-// };
-// https.createServer(httpsOptions, app).listen(PORT, () => {
-//   console.log(`Server listening on ${PORT}`);
-// });
+const certPath = '/etc/letsencrypt/live/workster.app/fullchain.pem';
+const keyPath = '/etc/letsencrypt/live/workster.app/privkey.pem';
+const httpsOptions = {
+  cert: fs.readFileSync(certPath),
+  key: fs.readFileSync(keyPath),
+};
+https.createServer(httpsOptions, app).listen(PORT, () => {
+  console.log(`Server listening on ${PORT}`);
+});
 
 app.get('/*', (req, res, next) => {
   if (req.url.startsWith('/api/')) {
@@ -69,9 +69,9 @@ app.get('/*', (req, res, next) => {
   res.sendFile(path.join(static_dir, 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`Server listening on ${PORT}`);
-});
+// app.listen(PORT, () => {
+//   console.log(`Server listening on ${PORT}`);
+// });
 
 const lang = 'en';
 const key = process.env.API_KEY;
