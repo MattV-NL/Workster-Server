@@ -19,6 +19,7 @@ const storeUserCredentials = require('./authenticationFunc/storeUserCredentials'
 const verifyToken = require('./authenticationFunc/verifyToken');
 const attemptLogin = require('./authenticationFunc/attemptLogin');
 const cron = require('node-cron');
+const { nextTick } = require('process');
 
 const corsOptions = {
   origin: 'http://localhost:3000',
@@ -50,24 +51,32 @@ app.use(express.json());
 
 // commented out for dev environment
 // since cert is on VM
-const certPath = '/etc/letsencrypt/live/workster.app/fullchain.pem';
-const keyPath = '/etc/letsencrypt/live/workster.app/privkey.pem';
-const httpsOptions = {
-  cert: fs.readFileSync(certPath),
-  key: fs.readFileSync(keyPath),
-};
-https.createServer(httpsOptions, app).listen(PORT, () => {
-  console.log(`Server listening on ${PORT}`);
-});
-
-// app.listen(PORT, () => {
+// const certPath = '/etc/letsencrypt/live/workster.app/fullchain.pem';
+// const keyPath = '/etc/letsencrypt/live/workster.app/privkey.pem';
+// const httpsOptions = {
+//   cert: fs.readFileSync(certPath),
+//   key: fs.readFileSync(keyPath),
+// };
+// https.createServer(httpsOptions, app).listen(PORT, () => {
 //   console.log(`Server listening on ${PORT}`);
 // });
+
+app.get('/*', (req, res, next) => {
+  if (req.url.startsWith('/api/')) {
+    next();
+    return;
+  }
+  res.sendFile(path.join(static_dir, 'index.html'));
+});
+
+app.listen(PORT, () => {
+  console.log(`Server listening on ${PORT}`);
+});
 
 const lang = 'en';
 const key = process.env.API_KEY;
 
-app.post('/save_location', async (req, res) => {
+app.post('/api/save_location', async (req, res) => {
   const body = req.body;
   try {
     if (
@@ -99,7 +108,7 @@ app.get('/api/weather/:latlonunits', async (req, res) => {
   res.send(response.data);
 });
 
-app.post('/register', async (req, res) => {
+app.post('/api/register', async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
   const email = req.body.email;
@@ -112,7 +121,7 @@ app.post('/register', async (req, res) => {
   }
 });
 
-app.post('/login', async (req, res) => {
+app.post('/api/login', async (req, res) => {
   const username = req.body.username;
   const password = req.body.password;
   const timestamp = dayjs.utc().format('YYYY-MM-DD HH:mm:ss').toString();
@@ -124,7 +133,7 @@ app.post('/login', async (req, res) => {
   );
 });
 
-app.get('/auth_check', verifyToken, (req, res) => {
+app.get('/api/auth_check', verifyToken, (req, res) => {
   res.send({
     auth: true,
     message: 'authentication successful',
@@ -133,7 +142,7 @@ app.get('/auth_check', verifyToken, (req, res) => {
   });
 });
 
-app.post('/get_locations', async (req, res) => {
+app.post('/api/get_locations', async (req, res) => {
   const body = req.body;
   try {
     const locations = await pool.query(
@@ -149,7 +158,7 @@ app.post('/get_locations', async (req, res) => {
   }
 });
 
-app.post('/save_work_information', async (req, res) => {
+app.post('/api/save_work_information', async (req, res) => {
   const body = req.body;
   const timestamp = dayjs.utc().format('YYYY-MM-DD HH:mm:ss').toString();
   const date = body.date + ' 00:00:00';
@@ -174,7 +183,7 @@ app.post('/save_work_information', async (req, res) => {
   }
 });
 
-app.get('/get_work_information/:location_id', async (req, res) => {
+app.get('/api/get_work_information/:location_id', async (req, res) => {
   const location_id = req.params.location_id;
   const work_information = await pool.query(
     'SELECT * FROM work_information WHERE location_id = $1',
@@ -184,19 +193,19 @@ app.get('/get_work_information/:location_id', async (req, res) => {
   res.send(work_information.rows);
 });
 
-app.post('/delete_work_information', async (req, res) => {
+app.post('/api/delete_work_information', async (req, res) => {
   const information_id = req.body.information_id;
   res.send(
     await deleteRow(pool, 'work_information', 'information_id', information_id)
   );
 });
 
-app.post('/delete_location', async (req, res) => {
+app.post('/api/delete_location', async (req, res) => {
   const location_id = req.body.location_id;
   res.send(await deleteRow(pool, 'work_locations', 'location_id', location_id));
 });
 
-app.post('/save_settings', async (req, res) => {
+app.post('/api/save_settings', async (req, res) => {
   const settings = req.body;
   const darkMode = settings.darkMode;
   const units = settings.units;
@@ -248,7 +257,7 @@ app.post('/save_settings', async (req, res) => {
   }
 });
 
-app.post('/get_settings', async (req, res) => {
+app.post('/api/get_settings', async (req, res) => {
   const user_id = req.body.user_id;
   try {
     if (await checkForSavedData(user_id, pool, 'user_settings')) {
