@@ -19,7 +19,6 @@ const storeUserCredentials = require('./authenticationFunc/storeUserCredentials'
 const verifyToken = require('./authenticationFunc/verifyToken');
 const attemptLogin = require('./authenticationFunc/attemptLogin');
 const cron = require('node-cron');
-const { nextTick } = require('process');
 
 const corsOptions = {
   origin: 'http://localhost:3000',
@@ -261,7 +260,7 @@ app.post('/api/get_settings', async (req, res) => {
   try {
     if (await checkForSavedData(user_id, pool, 'user_settings')) {
       const settings = await pool.query(
-        'SELECT darkmode_on, measurement_unit, email_notifications, rain_limit, snow_limit wind_limit FROM user_settings WHERE user_id = $1',
+        'SELECT darkmode_on, measurement_unit, email_notifications, rain_limit, snow_limit, wind_limit FROM user_settings WHERE user_id = $1',
         [user_id]
       );
       res.send(settings.rows);
