@@ -48,6 +48,13 @@ const static_dir = path.resolve(
 app.use('/', express.static(static_dir));
 app.use(cors(corsOptions));
 app.use(express.json());
+app.get('/*', (req, res, next) => {
+  if (req.url.startsWith('/api/')) {
+    next();
+    return;
+  }
+  res.sendFile(path.join(static_dir, 'index.html'));
+});
 
 // commented out for dev environment
 // since cert is on VM
@@ -59,14 +66,6 @@ const httpsOptions = {
 };
 https.createServer(httpsOptions, app).listen(PORT, () => {
   console.log(`Server listening on ${PORT}`);
-});
-
-app.get('/*', (req, res, next) => {
-  if (req.url.startsWith('/api/')) {
-    next();
-    return;
-  }
-  res.sendFile(path.join(static_dir, 'index.html'));
 });
 
 // app.listen(PORT, () => {
