@@ -16,7 +16,11 @@ const storeUserCredentials = async (
       if (err) {
         res.send({ message: 'registration failed', status: true });
       } else {
-        res.send({ message: 'registration successful', status: false });
+        res.send({
+          message: 'registration successful',
+          status: false,
+          successful: true,
+        });
       }
     }
   );
