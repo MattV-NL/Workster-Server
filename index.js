@@ -76,10 +76,12 @@ const key = process.env.API_KEY;
 
 app.post('/api/save_location', async (req, res) => {
   const body = req.body;
+  const lat = Number(body.lat);
+  const lon = Number(body.lon);
   try {
     if (
       (await checkForSavedData(body.user_id, pool, 'work_locations')) &&
-      (await locationIsSaved(pool, body.user_id, body.longitude, body.latitude))
+      (await locationIsSaved(pool, body.user_id, lon, lat))
     ) {
       res.send({ message: 'location already saved' });
     } else {

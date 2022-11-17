@@ -3,15 +3,15 @@ const locationIsSaved = async (pool, user_id, lon, lat) => {
     'SELECT latitude, longitude FROM work_locations WHERE user_id = $1',
     [user_id]
   );
-  const checkLat = async (coordinate) => {
-    if ((await coordinate.latitude) == lat) {
+  const checkLat = (coordinate) => {
+    if (coordinate.latitude === lat) {
       return true;
     }
     return false;
   };
 
-  const checkLon = async (coordinate) => {
-    if ((await coordinate.longitude) == lon) {
+  const checkLon = (coordinate) => {
+    if (coordinate.longitude === lon) {
       return true;
     }
     return false;
@@ -19,7 +19,7 @@ const locationIsSaved = async (pool, user_id, lon, lat) => {
   if (response.rows.some(checkLat) && response.rows.some(checkLon)) {
     return true;
   } else {
-    false;
+    return false;
   }
 };
 
