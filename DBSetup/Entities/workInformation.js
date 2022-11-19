@@ -26,7 +26,6 @@ module.exports = new EntitySchema({
     },
     is_scaffolding: {
       type: 'boolean',
-      default: false,
     },
     work_details: {
       type: 'varchar',
