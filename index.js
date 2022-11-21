@@ -285,3 +285,8 @@ app.post('/api/get_settings', async (req, res) => {
     });
   }
 });
+
+app.post('/api/delete_account', async (req, res) => {
+  const user_id = req.body.user_id;
+  res.send(await deleteRow(pool, 'users', 'user_id', user_id));
+});
