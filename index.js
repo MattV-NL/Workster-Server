@@ -30,7 +30,7 @@ const pool = new Pool({
   port: 5432,
   password: process.env.POSTGRES_PW,
   database: process.env.POSTGRES_USER_DATABASE,
-  max: 10,
+  max: 3,
   connectionTimeoutMillis: 0,
   idleTimeoutMillis: 0,
 });
