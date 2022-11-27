@@ -20,6 +20,7 @@ const verifyToken = require('./authenticationFunc/verifyToken');
 const attemptLogin = require('./authenticationFunc/attemptLogin');
 const cron = require('node-cron');
 const recoverAccount = require('./authenticationFunc/recoverAccount');
+const checkForDeletedUsers = require('./utilFunc/checkForDeletedUsers');
 
 const corsOptions = {
   origin: 'http://localhost:3000',
@@ -40,6 +41,10 @@ const pool = new Pool({
 
 cron.schedule('0 */3 * * *', () => {
   emailAlert(pool);
+});
+
+cron.schedule('0 0 */15 * *', () => {
+  checkForDeletedUsers(pool);
 });
 
 const static_dir = path.resolve(
@@ -126,7 +131,7 @@ app.post('/api/login', async (req, res) => {
   const timestamp = dayjs.utc().format('YYYY-MM-DD HH:mm:ss').toString();
 
   pool.query(
-    'SELECT user_id, username, password FROM users',
+    'SELECT user_id, username, password, is_deleted FROM users',
     async (err, result) =>
       await attemptLogin(err, result, username, password, timestamp, res, pool)
   );
