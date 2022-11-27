@@ -19,6 +19,7 @@ const storeUserCredentials = require('./authenticationFunc/storeUserCredentials'
 const verifyToken = require('./authenticationFunc/verifyToken');
 const attemptLogin = require('./authenticationFunc/attemptLogin');
 const cron = require('node-cron');
+const recoverAccount = require('./authenticationFunc/recoverAccount');
 
 const corsOptions = {
   origin: 'http://localhost:3000',
@@ -302,4 +303,14 @@ app.post('/api/soft_delete_account', async (req, res) => {
     message:
       'account has been deleted. If you change your mind your account can be recovered at anytime in the next 30 days.',
   });
+});
+
+app.post('/api/recover_account', async (req, res) => {
+  const username = req.body.username;
+  const password = req.body.password;
+  pool.query(
+    'SELECT username, password FROM users',
+    async (err, result) =>
+      await recoverAccount(res, pool, result, username, password)
+  );
 });
