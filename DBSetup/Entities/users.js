@@ -29,5 +29,9 @@ module.exports = new EntitySchema({
       type: 'timestamp without time zone',
       nullable: true,
     },
+    is_deleted: {
+      type: 'boolean',
+      nullable: true,
+    },
   },
 });

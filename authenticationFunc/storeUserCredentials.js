@@ -14,7 +14,7 @@ const storeUserCredentials = async (
     [username, email, hashedPassword, timestamp],
     async (err) => {
       if (err) {
-        res.send({ message: 'registration failed', status: true });
+        res.send({ message: 'registration failed', status: true, err });
       } else {
         res.send({
           message: 'registration successful',

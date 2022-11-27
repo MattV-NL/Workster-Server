@@ -7,7 +7,7 @@ const datasource = new typeorm.DataSource({
   type: 'postgres',
   host: process.env.POSTGRES_SERVER || 'localhost',
   port: 5432,
-  username: process.env.POSTGRES_USER_DATABASE,
+  username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PW,
   database: process.env.POSTGRES_USER_DATABASE,
   synchronize: true,

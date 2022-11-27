@@ -26,11 +26,11 @@ const corsOptions = {
 
 const pool = new Pool({
   host: process.env.POSTGRES_SERVER || 'localhost',
-  user: process.env.POSTGRES_USER_DATABASE,
+  user: process.env.POSTGRES_USER,
   port: 5432,
   password: process.env.POSTGRES_PW,
   database: process.env.POSTGRES_USER_DATABASE,
-  max: 3,
+  max: 10,
   connectionTimeoutMillis: 0,
   idleTimeoutMillis: 0,
 });
@@ -286,7 +286,20 @@ app.post('/api/get_settings', async (req, res) => {
   }
 });
 
-app.post('/api/delete_account', async (req, res) => {
+// app.post('/api/delete_account', async (req, res) => {
+//   const user_id = req.body.user_id;
+//   res.send(await deleteRow(pool, 'users', 'user_id', user_id));
+// });
+
+app.post('/api/soft_delete_account', async (req, res) => {
   const user_id = req.body.user_id;
-  res.send(await deleteRow(pool, 'users', 'user_id', user_id));
+  const deleted = true;
+  await pool.query('UPDATE users SET is_deleted = $1 WHERE user_id = $2', [
+    deleted,
+    user_id,
+  ]);
+  res.send({
+    message:
+      'account has been deleted. If you change your mind your account can be recovered at anytime in the next 30 days.',
+  });
 });
