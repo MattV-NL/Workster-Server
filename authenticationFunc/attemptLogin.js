@@ -16,8 +16,10 @@ const attemptLogin = async (
 ) => {
   const userInfo = result.rows.find((body) => body.username === username);
   try {
-    if (!userInfo.is_deleted) {
-      if (await verifyPassword(userInfo.password, password)) {
+    if (userInfo) {
+      if (
+        await verifyPassword(userInfo.password, password, userInfo.is_deleted)
+      ) {
         const jwtPayload = {
           username: userInfo.username,
           user_id: userInfo.user_id,

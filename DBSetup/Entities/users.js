@@ -32,6 +32,7 @@ module.exports = new EntitySchema({
     is_deleted: {
       type: 'boolean',
       nullable: true,
+      default: 'false',
     },
   },
 });
