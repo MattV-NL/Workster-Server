@@ -34,5 +34,9 @@ module.exports = new EntitySchema({
       nullable: true,
       default: 'false',
     },
+    deleted_on: {
+      type: 'timestamp without time zone',
+      nullable: true,
+    },
   },
 });

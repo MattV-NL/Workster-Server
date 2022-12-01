@@ -20,7 +20,7 @@ const verifyToken = require('./authenticationFunc/verifyToken');
 const attemptLogin = require('./authenticationFunc/attemptLogin');
 const cron = require('node-cron');
 const recoverAccount = require('./authenticationFunc/recoverAccount');
-const checkForDeletedUsers = require('./utilFunc/checkForDeletedUsers');
+const deleteExpiredUsers = require('./utilFunc/deleteExpiredUsers');
 
 const corsOptions = {
   origin: 'http://localhost:3000',
@@ -37,14 +37,9 @@ const pool = new Pool({
   idleTimeoutMillis: 0,
 });
 
-// remove cron to demo email
-
 cron.schedule('0 */3 * * *', () => {
   emailAlert(pool);
-});
-
-cron.schedule('0 0 */15 * *', () => {
-  checkForDeletedUsers(pool);
+  deleteExpiredUsers(pool, 'users');
 });
 
 const static_dir = path.resolve(
@@ -292,18 +287,14 @@ app.post('/api/get_settings', async (req, res) => {
   }
 });
 
-// app.post('/api/delete_account', async (req, res) => {
-//   const user_id = req.body.user_id;
-//   res.send(await deleteRow(pool, 'users', 'user_id', user_id));
-// });
-
 app.post('/api/soft_delete_account', async (req, res) => {
   const user_id = req.body.user_id;
   const deleted = true;
-  await pool.query('UPDATE users SET is_deleted = $1 WHERE user_id = $2', [
-    deleted,
-    user_id,
-  ]);
+  const date = Math.floor(Date.now() / 1000);
+  await pool.query(
+    'UPDATE users SET is_deleted = $1, deleted_on = $2 WHERE user_id = $3',
+    [deleted, date, user_id]
+  );
   res.send({
     message:
       'account has been deleted. If you change your mind your account can be recovered at anytime in the next 30 days.',
