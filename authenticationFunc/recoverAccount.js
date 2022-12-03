@@ -11,12 +11,14 @@ const recoverAccount = async (res, pool, result, username, password) => {
       ]);
       res.send({
         message: 'account recovered',
+        successful: true,
       });
     }
   } catch (err) {
     res.send({
       message: 'oops, something went wrong',
       err,
+      successful: false,
     });
   }
 };
