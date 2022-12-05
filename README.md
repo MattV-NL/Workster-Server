@@ -1,6 +1,6 @@
 # Workster-Server
 
-This is the back end portion of one of my projects. The front end can be found here https://github.com/MattV-NL/Workster-Client.
+This is the back end portion of one of my projects, it was built using Express.js. The front end can be found here https://github.com/MattV-NL/Workster-Client.
 
 ## Functionality
 This backend handles all the communication betweent he front end and the weather API as well as the database. The database can store the users login information, the saved locations, work information related to a particular locations, as well as the users saved settings.
