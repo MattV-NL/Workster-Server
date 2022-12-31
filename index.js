@@ -37,7 +37,7 @@ const pool = new Pool({
   idleTimeoutMillis: 0,
 });
 
-cron.schedule('0 */3 * * *', () => {
+cron.schedule('0 */6 * * *', () => {
   emailAlert(pool);
   deleteExpiredUsers(pool, 'users');
 });
