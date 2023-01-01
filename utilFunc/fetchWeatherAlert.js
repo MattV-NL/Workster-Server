@@ -1,4 +1,3 @@
-// require('dotenv').config();
 const dotenv = require('dotenv');
 const axios = require('axios');
 dotenv.config({ path: '../.env' });
@@ -9,8 +8,8 @@ const key = process.env.API_KEY;
 const lang = 'en';
 
 const millisToDate = (millis) => {
-  const day = new Date(millis * 1000).getDay();
-  const month = new Date(millis * 1000).getMonth();
+  const day = new Date(millis * 1000).getDay() + 1;
+  const month = new Date(millis * 1000).getMonth() + 1;
   const year = new Date(millis * 1000).getFullYear();
   const hour = new Date(millis * 1000).getHours();
   const minute = new Date(millis * 1000).getMinutes();
@@ -73,7 +72,7 @@ const fetchWeatherAlert = async (lat, lon, unit, email, username) => {
       //       },
       //       from: {
       //         email: process.env.SENDGRID_SENDER_EMAIL,
-      //         name: 'Work Weather Analyzer App',
+      //         name: 'Workster DEMO',
       //       },
       //       templateId: 'd-d06dbfc9133c4df8b853f49af35dea6e',
 
