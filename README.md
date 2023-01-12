@@ -13,4 +13,3 @@ I chose to build this project as I was working throughout the winter outside in 
 ## Deployment
 I deployed the app myself using a linode VM.
 This project is live at https://workster.app/
-
