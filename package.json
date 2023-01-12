@@ -7,7 +7,8 @@
     "start": "node index.js",
     "devStart": "nodemon index.js",
     "prebuild": "chmod 777 build.sh",
-    "build": "./build.sh"
+    "build": "./build.sh",
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
@@ -29,6 +30,7 @@
     "typeorm": "^0.3.0-rc.41"
   },
   "devDependencies": {
+    "jest": "^29.3.1",
     "nodemon": "^2.0.18"
   }
 }
