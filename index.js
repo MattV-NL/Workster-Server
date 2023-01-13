@@ -41,6 +41,7 @@ cron.schedule('0 */6 * * *', () => {
   emailAlert(pool);
   deleteExpiredUsers(pool, 'users');
 });
+deleteExpiredUsers(pool, 'users');
 
 const static_dir = path.resolve(
   path.join(__dirname, '../Workster-Client/build')
@@ -58,19 +59,19 @@ app.get('/*', (req, res, next) => {
 
 // commented out for dev environment
 // since cert is on VM
-const certPath = '/etc/letsencrypt/live/workster.app/fullchain.pem';
-const keyPath = '/etc/letsencrypt/live/workster.app/privkey.pem';
-const httpsOptions = {
-  cert: fs.readFileSync(certPath),
-  key: fs.readFileSync(keyPath),
-};
-https.createServer(httpsOptions, app).listen(PORT, () => {
-  console.log(`Server listening on ${PORT}`);
-});
-
-// app.listen(PORT, () => {
+// const certPath = '/etc/letsencrypt/live/workster.app/fullchain.pem';
+// const keyPath = '/etc/letsencrypt/live/workster.app/privkey.pem';
+// const httpsOptions = {
+//   cert: fs.readFileSync(certPath),
+//   key: fs.readFileSync(keyPath),
+// };
+// https.createServer(httpsOptions, app).listen(PORT, () => {
 //   console.log(`Server listening on ${PORT}`);
 // });
+
+app.listen(PORT, () => {
+  console.log(`Server listening on ${PORT}`);
+});
 
 const lang = 'en';
 const key = process.env.API_KEY;
