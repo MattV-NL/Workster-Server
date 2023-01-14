@@ -3,19 +3,20 @@ const axios = require('axios');
 dotenv.config({ path: '../.env' });
 const client = require('@sendgrid/mail');
 client.setApiKey(process.env.SENDGRID_API_KEY);
+import { millisToDate } from './millisToDate';
 
 const key = process.env.API_KEY;
 const lang = 'en';
 
-const millisToDate = (millis) => {
-  const day = new Date(millis * 1000).getDay() + 1;
-  const month = new Date(millis * 1000).getMonth() + 1;
-  const year = new Date(millis * 1000).getFullYear();
-  const hour = new Date(millis * 1000).getHours();
-  const minute = new Date(millis * 1000).getMinutes();
+// const millisToDate = (millis) => {
+//   const day = new Date(millis * 1000).getDay() + 1;
+//   const month = new Date(millis * 1000).getMonth() + 1;
+//   const year = new Date(millis * 1000).getFullYear();
+//   const hour = new Date(millis * 1000).getHours();
+//   const minute = new Date(millis * 1000).getMinutes();
 
-  return `${hour}:${minute}, ${day}-${month}-${year}`;
-};
+//   return `${hour}:${minute}, ${day}-${month}-${year}`;
+// };
 
 const fetchWeatherAlert = async (lat, lon, unit, email, username) => {
   try {
