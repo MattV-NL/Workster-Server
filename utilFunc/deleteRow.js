@@ -1,10 +1,10 @@
 const deleteRow = async (pool, table, targetId, id) => {
-  try {
-    await pool.query(`DELETE FROM ${table} WHERE ${targetId} = $1`, [id]);
-    return { message: 'successfully deleted row' };
-  } catch (err) {
-    console.log(err);
-    return { message: 'oops something went wrong', error: err };
+  const response = await pool.query(
+    `DELETE FROM ${table} WHERE ${targetId} = $1`,
+    [id]
+  );
+  if (response.rowCount > 0) {
+    return { message: 'successfully deleted row', pass: true };
   }
 };
 

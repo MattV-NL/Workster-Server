@@ -41,7 +41,6 @@ cron.schedule('0 */6 * * *', () => {
   emailAlert(pool);
   deleteExpiredUsers(pool, 'users');
 });
-deleteExpiredUsers(pool, 'users');
 
 const static_dir = path.resolve(
   path.join(__dirname, '../Workster-Client/build')
