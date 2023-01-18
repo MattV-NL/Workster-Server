@@ -1,6 +1,6 @@
-const fetchWeatherAlert = require('./fetchWeatherAlert');
+import { fetchWeatherAlert } from './fetchWeatherAlert.js';
 
-const emailAlert = async (pool) => {
+export const emailAlert = async (pool) => {
   try {
     const response = await pool.query(
       'SELECT email_notifications, user_id, measurement_unit FROM user_settings WHERE email_notifications = true'
@@ -29,5 +29,3 @@ const emailAlert = async (pool) => {
     return;
   }
 };
-
-module.exports = emailAlert;

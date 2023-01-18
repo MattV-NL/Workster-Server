@@ -1,4 +1,4 @@
-const deleteRow = async (pool, table, targetId, id) => {
+export const deleteRow = async (pool, table, targetId, id) => {
   const response = await pool.query(
     `DELETE FROM ${table} WHERE ${targetId} = $1`,
     [id]
@@ -7,5 +7,3 @@ const deleteRow = async (pool, table, targetId, id) => {
     return { message: 'successfully deleted row', pass: true };
   }
 };
-
-module.exports = deleteRow;

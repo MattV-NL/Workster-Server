@@ -1,4 +1,4 @@
-const deleteExpiredUsers = async (pool, table) => {
+export const deleteExpiredUsers = async (pool, table) => {
   try {
     const date = Math.floor(Date.now() / 1000);
     const response = await pool.query(
@@ -13,5 +13,3 @@ const deleteExpiredUsers = async (pool, table) => {
     console.log(err);
   }
 };
-
-module.exports = deleteExpiredUsers;

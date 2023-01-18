@@ -1,14 +1,18 @@
-const dotenv = require('dotenv');
-const axios = require('axios');
-dotenv.config({ path: '../.env' });
-const client = require('@sendgrid/mail');
-client.setApiKey(process.env.SENDGRID_API_KEY);
-const millisToDate = require('./millisToDate');
+import dotenv from 'dotenv';
+import axios from 'axios';
+import client from '@sendgrid/mail';
+import { millisToDate } from './millisToDate.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+client.setApiKey(process.env.SENDGRID_API_KEY);
 const key = process.env.API_KEY;
 const lang = 'en';
 
-const fetchWeatherAlert = async (lat, lon, unit, email, username) => {
+export const fetchWeatherAlert = async (lat, lon, unit, email, username) => {
   try {
     const response = await axios.get(
       `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${key}&units=${unit}&lang${lang}`
@@ -86,5 +90,3 @@ const fetchWeatherAlert = async (lat, lon, unit, email, username) => {
     return false;
   }
 };
-
-module.exports = fetchWeatherAlert;
