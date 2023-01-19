@@ -1,6 +1,6 @@
 jest.mock('pg');
-const checkForSavedData = require('../../utilFunc/checkForSavedData');
-const { Pool } = require('pg');
+import checkForSavedData from '../../utilFunc/checkForSavedData.js';
+import pg from 'pg';
 
 test('should return true if saved data exists', async () => {
   const targetTable = 'test';
@@ -16,7 +16,7 @@ test('should return true if saved data exists', async () => {
   //       };
   //     },
   //   };
-  const pool = new Pool({});
+  const pool = new pg.Pool({});
   pool.query.mockResolvedValueOnce({ rows: [{ user_id: givenUserId }] });
   const result = await checkForSavedData(givenUserId, pool, targetTable);
   // check return value

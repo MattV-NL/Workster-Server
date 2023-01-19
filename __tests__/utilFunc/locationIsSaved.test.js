@@ -1,12 +1,14 @@
+import jest from 'jest';
+import locationIsSaved from '../../utilFunc/locationIsSaved.js';
+import pg from 'pg';
+
 jest.mock('pg');
-const locationIsSaved = require('../../utilFunc/locationIsSaved');
-const { Pool } = require('pg');
 
 test('should return true if location is saved', async () => {
   const user_id = 0;
   const lat = 0;
   const lon = 0;
-  const pool = new Pool({});
+  const pool = new pg.Pool({});
   pool.query.mockResolvedValueOnce({
     rows: [{ latitude: lat, longitude: lon }],
   });

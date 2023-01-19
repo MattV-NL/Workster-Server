@@ -4,8 +4,14 @@ export const updateLastLoginAttempt = async (pool, timestamp, username) => {
       timestamp,
       username,
     ]);
-    console.log({ message: `logged last login attempt for ${username}` });
+    return {
+      message: `updated last login attempt for ${username}`,
+      pass: true,
+    };
   } catch (err) {
-    console.log(err);
+    return {
+      message: `updated last login attempt for ${username} FAILED`,
+      pass: false,
+    };
   }
 };
