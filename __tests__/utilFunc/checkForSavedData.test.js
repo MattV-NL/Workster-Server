@@ -1,5 +1,5 @@
 jest.mock('pg');
-const checkForSavedData = require('../../utilFunc/checkForSavedData');
+const checkForSavedData = require('../../src/utilFunc/checkForSavedData');
 const { Pool } = require('pg');
 
 test('should return true if saved data exists', async () => {
