@@ -1,23 +1,18 @@
-const dotenv = require('dotenv');
-const axios = require('axios');
-dotenv.config({ path: '../.env' });
-const client = require('@sendgrid/mail');
-client.setApiKey(process.env.SENDGRID_API_KEY);
+import dotenv from 'dotenv';
+import axios from 'axios';
+import client from '@sendgrid/mail';
+import { millisToDate } from './millisToDate.js';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+client.setApiKey(process.env.SENDGRID_API_KEY);
 const key = process.env.API_KEY;
 const lang = 'en';
 
-const millisToDate = (millis) => {
-  const day = new Date(millis * 1000).getDay() + 1;
-  const month = new Date(millis * 1000).getMonth() + 1;
-  const year = new Date(millis * 1000).getFullYear();
-  const hour = new Date(millis * 1000).getHours();
-  const minute = new Date(millis * 1000).getMinutes();
-
-  return `${hour}:${minute}, ${day}-${month}-${year}`;
-};
-
-const fetchWeatherAlert = async (lat, lon, unit, email, username) => {
+export const fetchWeatherAlert = async (lat, lon, unit, email, username) => {
   try {
     const response = await axios.get(
       `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${key}&units=${unit}&lang${lang}`
@@ -95,5 +90,3 @@ const fetchWeatherAlert = async (lat, lon, unit, email, username) => {
     return false;
   }
 };
-
-module.exports = fetchWeatherAlert;

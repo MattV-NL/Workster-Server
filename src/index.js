@@ -1,32 +1,39 @@
-const express = require('express');
-const path = require('path');
-const fs = require('fs');
-const https = require('https');
+import express from 'express';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import fs from 'fs';
+import https from 'https';
+import axios from 'axios';
+import cors from 'cors';
+import pg from 'pg';
+import dayjs from 'dayjs';
+import cron from 'node-cron';
+import { deleteRow } from './utilFunc/deleteRow.js';
+import { checkForSavedData } from './utilFunc/checkForSavedData.js';
+import { emailAlert } from './utilFunc/emailAlert.js';
+import { locationIsSaved } from './utilFunc/locationIsSaved.js';
+import { storeUserCredentials } from './authenticationFunc/storeUserCredentials.js';
+import { verifyToken } from './authenticationFunc/verifyToken.js';
+import { attemptLogin } from './authenticationFunc/attemptLogin.js';
+import { recoverAccount } from './authenticationFunc/recoverAccount.js';
+import { deleteExpiredUsers } from './utilFunc/deleteExpiredUsers.js';
+import dotenv from 'dotenv';
+import utc from 'dayjs/plugin/utc.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const static_dir = path.resolve(
+  path.join(__dirname, '../../Workster-Client/build')
+);
+dayjs.extend(utc);
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 const app = express();
 const PORT = process.env.PORT || 8000;
-const axios = require('axios');
-const cors = require('cors');
-require('dotenv').config();
-const { Pool } = require('pg');
-const dayjs = require('dayjs');
-const utc = require('dayjs/plugin/utc');
-dayjs.extend(utc);
-const deleteRow = require('./utilFunc/deleteRow');
-const checkForSavedData = require('./utilFunc/checkForSavedData');
-const emailAlert = require('./utilFunc/emailAlert');
-const locationIsSaved = require('./utilFunc/locationIsSaved');
-const storeUserCredentials = require('./authenticationFunc/storeUserCredentials');
-const verifyToken = require('./authenticationFunc/verifyToken');
-const attemptLogin = require('./authenticationFunc/attemptLogin');
-const cron = require('node-cron');
-const recoverAccount = require('./authenticationFunc/recoverAccount');
-const deleteExpiredUsers = require('./utilFunc/deleteExpiredUsers');
-
 const corsOptions = {
   origin: 'http://localhost:3000',
 };
 
-const pool = new Pool({
+const pool = new pg.Pool({
   host: process.env.POSTGRES_SERVER || 'localhost',
   user: process.env.POSTGRES_USER,
   port: 5432,
@@ -42,9 +49,6 @@ cron.schedule('0 */6 * * *', () => {
   deleteExpiredUsers(pool, 'users');
 });
 
-const static_dir = path.resolve(
-  path.join(__dirname, '../Workster-Client/build')
-);
 app.use('/', express.static(static_dir));
 app.use(cors(corsOptions));
 app.use(express.json());
