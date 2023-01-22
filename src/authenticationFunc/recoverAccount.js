@@ -1,6 +1,7 @@
 const verifyPassword = require('./verifyPassword');
 
 const recoverAccount = async (res, pool, result, username, password) => {
+
   const userInfo = result.rows.find((body) => body.username === username);
   try {
     if (verifyPassword(userInfo.password, password)) {

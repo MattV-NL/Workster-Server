@@ -18,6 +18,7 @@ const millisToDate = (millis) => {
 };
 
 const fetchWeatherAlert = async (lat, lon, unit, email, username) => {
+
   try {
     const response = await axios.get(
       `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${key}&units=${unit}&lang${lang}`

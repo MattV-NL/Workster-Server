@@ -58,5 +58,4 @@ const attemptLogin = async (
     res.status(500).send();
   }
 };
-
 module.exports = attemptLogin;

@@ -1,6 +1,7 @@
 const fetchWeatherAlert = require('./fetchWeatherAlert');
 
 const emailAlert = async (pool) => {
+
   try {
     const response = await pool.query(
       'SELECT email_notifications, user_id, measurement_unit FROM user_settings WHERE email_notifications = true'
