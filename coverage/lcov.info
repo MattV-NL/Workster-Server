@@ -1,6 +1,10 @@
 TN:
+<<<<<<< HEAD
 SF:utilFunc\checkForSavedData.js
 FN:1,Object.<anonymous>
+=======
+SF:src\utilFunc\checkForSavedData.js
+>>>>>>> c2fa69077422f07eb84080f903ed568a3e85cd5d
 FN:1,checkForSavedData
 FN:3,checkUsers
 FNF:3
@@ -22,10 +26,8 @@ DA:11,1
 DA:12,0
 DA:13,0
 DA:14,1
-DA:15,1
-DA:16,1
-LF:16
-LH:13
+LF:14
+LH:11
 BRDA:1,0,0,1
 BRDA:1,1,0,1
 BRDA:1,2,0,1

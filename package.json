@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "devStart": "nodemon index.js",
+    "start": "node ./src/index.js",
+    "devStart": "nodemon ./src/index.js",
     "prebuild": "chmod 777 build.sh",
     "build": "./build.sh",
     "test": "jest"
@@ -27,7 +27,8 @@
     "node-cron": "^3.0.2",
     "path": "^0.12.7",
     "pg": "^8.7.3",
-    "typeorm": "^0.3.0-rc.41"
+    "typeorm": "^0.3.0-rc.41",
+    "url": "^0.11.0"
   },
   "devDependencies": {
     "jest": "^29.3.1",

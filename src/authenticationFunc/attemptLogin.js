@@ -1,11 +1,11 @@
-const verifyPassword = require('./verifyPassword');
-const updateLastLoginAttempt = require('./updateLastLogin');
-const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv');
+import { verifyPassword } from './verifyPassword.js';
+import { updateLastLoginAttempt } from './updateLastLogin.js';
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
 
-dotenv.config({ path: '../.env' });
+dotenv.config({ path: '../../.env' });
 
-const attemptLogin = async (
+export const attemptLogin = async (
   err,
   result,
   username,
@@ -58,5 +58,3 @@ const attemptLogin = async (
     res.status(500).send();
   }
 };
-
-module.exports = attemptLogin;
