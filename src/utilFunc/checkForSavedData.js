@@ -1,4 +1,5 @@
-export const checkForSavedData = async (givenUserId, pool, targetTable) => {
+const checkForSavedData = async (givenUserId, pool, targetTable) => {
+
   const response = await pool.query(`SELECT user_id FROM ${targetTable}`);
   const checkUsers = (storedUser) => {
     if (storedUser.user_id === givenUserId) {
@@ -12,3 +13,5 @@ export const checkForSavedData = async (givenUserId, pool, targetTable) => {
     return false;
   }
 };
+
+module.exports = checkForSavedData;

@@ -1,6 +1,7 @@
-import jwt from 'jsonwebtoken';
+const jwt = require('jsonwebtoken');
 
-export const verifyToken = (req, res, next) => {
+const verifyToken = (req, res, next) => {
+
   const token = req.headers['x-access-token'];
   if (!token) {
     res.send({ message: 'no authorization token found' });
@@ -15,3 +16,5 @@ export const verifyToken = (req, res, next) => {
     });
   }
 };
+
+module.exports = verifyToken;

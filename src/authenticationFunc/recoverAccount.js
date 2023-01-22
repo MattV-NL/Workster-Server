@@ -1,6 +1,7 @@
-import { verifyPassword } from './verifyPassword.js';
+const verifyPassword = require('./verifyPassword');
 
-export const recoverAccount = async (res, pool, result, username, password) => {
+const recoverAccount = async (res, pool, result, username, password) => {
+
   const userInfo = result.rows.find((body) => body.username === username);
   try {
     if (verifyPassword(userInfo.password, password)) {
@@ -22,3 +23,5 @@ export const recoverAccount = async (res, pool, result, username, password) => {
     });
   }
 };
+
+module.exports = recoverAccount;

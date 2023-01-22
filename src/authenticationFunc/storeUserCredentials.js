@@ -1,6 +1,6 @@
-import bcrypt from 'bcrypt';
+const bcrypt = require('bcrypt');
 
-export const storeUserCredentials = async (
+const storeUserCredentials = async (
   pool,
   username,
   password,
@@ -25,3 +25,5 @@ export const storeUserCredentials = async (
     }
   );
 };
+
+module.exports = storeUserCredentials;

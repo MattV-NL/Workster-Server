@@ -1,4 +1,5 @@
-export const deleteExpiredUsers = async (pool, table) => {
+const deleteExpiredUsers = async (pool, table) => {
+
   try {
     const date = Math.floor(Date.now() / 1000);
     await pool.query(
@@ -10,3 +11,5 @@ export const deleteExpiredUsers = async (pool, table) => {
     return { message: 'oops something went wrong', error: err };
   }
 };
+
+module.exports = deleteExpiredUsers;

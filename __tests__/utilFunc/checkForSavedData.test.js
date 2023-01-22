@@ -1,7 +1,5 @@
-import { jest } from '@jest/globals';
-import { checkForSavedData } from '../../src/utilFunc/checkForSavedData';
-import pg from 'pg';
-jest.mock('pg');
+const checkForSavedData = require('../../src/utilFunc/checkForSavedData');
+const { Pool } = require('pg');
 
 test('should return true if saved data exists', async () => {
   const targetTable = 'test';

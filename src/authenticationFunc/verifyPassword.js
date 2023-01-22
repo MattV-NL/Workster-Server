@@ -1,10 +1,6 @@
-import bcrypt from 'bcrypt';
+const bcrypt = require('bcrypt');
 
-export const verifyPassword = async (
-  givenPassword,
-  storedPassword,
-  is_deleted
-) => {
+const verifyPassword = async (givenPassword, storedPassword, is_deleted) => {
   if (is_deleted) {
     return false;
   } else if (await bcrypt.compare(storedPassword, givenPassword)) {
@@ -13,3 +9,5 @@ export const verifyPassword = async (
     return false;
   }
 };
+
+module.exports = verifyPassword;
