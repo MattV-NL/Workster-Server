@@ -1,5 +1,4 @@
 const app = require('./index');
-const path = require('path');
 const fs = require('fs');
 const https = require('https');
 require('dotenv').config();

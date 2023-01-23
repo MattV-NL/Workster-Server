@@ -2,9 +2,9 @@
   "name": "workster-server",
   "version": "1.0.0",
   "description": "",
-  "main": "src/start.js",
+  "main": "start.js",
   "scripts": {
-    "devStart": "nodemon",
+    "devStart": "nodemon src/start.js",
     "prebuild": "chmod 777 build.sh",
     "build": "./build.sh",
     "test": "jest --detectOpenHandles"

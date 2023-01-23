@@ -35,9 +35,8 @@ const pool = new Pool({
   idleTimeoutMillis: 0,
 });
 
-
 const static_dir = path.resolve(
-  path.join(__dirname, '../../../Workster-Client/build')
+  path.join(__dirname, '../../Workster-Client/build')
 );
 
 app.use('/', express.static(static_dir));
