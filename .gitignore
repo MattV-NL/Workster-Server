@@ -4,3 +4,6 @@
 # Ignore .env
 .env
 env.sh
+
+#ignore coverage
+/coverage
