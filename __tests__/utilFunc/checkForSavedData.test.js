@@ -1,5 +1,6 @@
 const checkForSavedData = require('../../src/utilFunc/checkForSavedData');
 const { Pool } = require('pg');
+jest.mock('pg');
 
 test('should return true if saved data exists', async () => {
   const targetTable = 'test';
