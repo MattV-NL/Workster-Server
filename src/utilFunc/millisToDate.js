@@ -1,4 +1,4 @@
-export const millisToDate = (millis) => {
+const millisToDate = (millis) => {
   const day = new Date(millis * 1000).getDay() + 1;
   const month = new Date(millis * 1000).getMonth() + 1;
   const year = new Date(millis * 1000).getFullYear();
@@ -7,3 +7,5 @@ export const millisToDate = (millis) => {
 
   return `${hour}:${minute}, ${day}-${month}-${year}`;
 };
+
+module.exports = millisToDate;

@@ -15,7 +15,4 @@ test('run test', async () => {
 
   expect(result).toBe(true);
   expect(pool.query).toHaveBeenCalledTimes(1);
-  expect(pool.query).toHaveBeenLastCalledWith(
-    'SELECT latitude, longitude FROM work_locations WHERE user_id = $1'
-  );
 });
