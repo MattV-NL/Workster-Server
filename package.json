@@ -7,7 +7,7 @@
     "devStart": "nodemon src/start.js",
     "prebuild": "chmod 777 build.sh",
     "build": "./build.sh",
-    "test": "jest --testMatch **/__tests__/utilFunc/**/*.[jt]s?(x) --detectOpenHandles"
+    "test": "jest --testMatch \"**/__tests__/utilFunc/**/*.[jt]s?(x)\" --detectOpenHandles"
   },
   "keywords": [],
   "author": "",
