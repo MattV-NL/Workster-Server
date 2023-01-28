@@ -1,4 +1,3 @@
-// const request = require('supertest');
 const app = require('../../src/index');
 const axios = require('axios');
 
