@@ -1,25 +1,21 @@
-const app = require('../../src/index');
 const axios = require('axios');
-jest.mock(axios);
+const app = require('../../src/index');
+let server;
 
-beforeAll(() => {
-  app.listen(4000, () => {
-    console.log('server started on 4000');
-  });
+beforeAll(async () => {
+  server = app.listen(4000);
 });
 
-afterAll(() => {
-  app.close(() => {
-    console.log('server closed');
-  });
+afterAll(async () => {
+  server.close();
 });
 
 test('testing register endpoint', async () => {
-  const response = await axios.post('/api/register', {
+  const response = await axios.post('http://localhost:4000/api/register', {
     username: 'test',
     password: 'test',
     email: 'test@test.test',
     timestamp: 'YYYY-MM-DD HH:mm:ss',
   });
-  expect(response.statusCode).toBe(200);
+  expect(response.status).toBe(200);
 });

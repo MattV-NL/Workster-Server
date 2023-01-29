@@ -1,17 +1,14 @@
-const app = require('../../src/index');
 const axios = require('axios');
+const app = require('../../src/index');
+let server;
 
-let server, agent;
-
-beforeAll(() => {
-  console.log('server started');
+beforeAll(async () => {
   server = app.listen(4000);
-}, 3000);
+});
 
-afterAll(() => {
-  console.log('server closed');
-  server.close(() => {});
-}, 3000);
+afterAll(async () => {
+  server.close();
+});
 
 test('testing getLocations endpoint', async () => {
   const response = await axios.post('http://localhost:4000/api/get_locations', {
@@ -20,5 +17,5 @@ test('testing getLocations endpoint', async () => {
     location_id: 0,
   });
 
-  expect(response.statusCode).toBe(200);
+  expect(response.status).toBe(200);
 });
