@@ -50,7 +50,7 @@ app.get('/*', (req, res, next) => {
   res.sendFile(path.join(static_dir, 'index.html'));
 });
 
-// startCron(pool);
+startCron(pool);
 saveLocation(app, pool, '/api/save_location');
 getWeather(app, '/api/weather/:latlonunits');
 register(app, pool, '/api/register');

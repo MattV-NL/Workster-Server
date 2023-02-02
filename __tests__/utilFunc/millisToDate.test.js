@@ -5,5 +5,4 @@ test('should return a date string', () => {
 
   const result = millisToDate(millis);
   expect(result).toBeDefined();
-  console.log(result);
 });
