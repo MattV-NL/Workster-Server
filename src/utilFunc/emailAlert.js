@@ -1,7 +1,6 @@
 const fetchWeatherAlert = require('./fetchWeatherAlert');
 
 const emailAlert = async (pool) => {
-
   try {
     const response = await pool.query(
       'SELECT email_notifications, user_id, measurement_unit FROM user_settings WHERE email_notifications = true'
@@ -25,9 +24,18 @@ const emailAlert = async (pool) => {
       .forEach(({ latitude, longitude, unit, email, username }, index) => {
         fetchWeatherAlert(latitude, longitude, unit, email, username, index);
       });
+
+    return {
+      message: 'checked for email alerts for users',
+      success: true,
+    };
   } catch (err) {
     console.log(err);
-    return;
+    return {
+      message: 'oops something went wrong',
+      success: false,
+      error: err,
+    };
   }
 };
 
