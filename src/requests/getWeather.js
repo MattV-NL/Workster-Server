@@ -6,10 +6,7 @@ const key = process.env.API_KEY;
 
 const getWeather = async (app, url) => {
   app.get('/api/weather/:latlonunits', async (req, res) => {
-    const latlonunits = req.params.latlonunits.split(',');
-    const lat = latlonunits[0];
-    const lon = latlonunits[1];
-    const units = latlonunits[2];
+    const [lat, lon, units] = req.params.latlonunits.split(',');
     const response = await axios.get(
       `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&appid=${key}&units=${units}&lang${lang}`
     );
@@ -18,3 +15,25 @@ const getWeather = async (app, url) => {
 };
 
 module.exports = getWeather;
+
+// function handler(req) {
+//   if (!req) {
+//     throw Error
+//   }
+
+//   const body = req.body
+
+//   if (!body) {
+//     throw Error
+//   }
+
+//   const [lat, lon, units] = req.params.latlonunits.split(',');
+
+//   if (!lat) { }
+
+//   //...
+
+//   const weather = await WeatherService.getWeather(lat, lon, units)
+
+//   return res.json(weather);
+// }

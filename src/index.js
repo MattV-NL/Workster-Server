@@ -24,6 +24,13 @@ const corsOptions = {
   origin: 'http://localhost:3000',
 };
 
+// const dbUser = process.env.POSTGRES_USER;
+
+// if (!dbUser) {
+//   // throw new Error('required user')
+//   console.warn('No user, not using database');
+// }
+
 const pool = new Pool({
   host: process.env.POSTGRES_SERVER || 'localhost',
   user: process.env.POSTGRES_USER,
