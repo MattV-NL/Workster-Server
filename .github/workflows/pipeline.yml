@@ -11,3 +11,19 @@ jobs:
         run: npm ci
       - name: run tests
         run: npm test
+  Deploy:
+    runs-on: ubuntu-latest
+    needs: Tests
+    steps:
+      - name: create SSH key
+        run: echo ${{ secrets.LINODE_SSH_KEY }} > key.ppk
+      - name: login to linode
+        run: ssh -i key.ppk -l cicd ${{ secrets.SERVER_URL }}
+      - name: kill existing process
+        run: pkill node start.js
+      - name: clone repo
+        run: cd ../../srv/workster/Workster-Server/ && git pull https://github.com/MattV-NL/Workster-Server.git
+      - name: install node modules
+        run: npm i
+      -name: start server
+        run: cd /src && node start.js
