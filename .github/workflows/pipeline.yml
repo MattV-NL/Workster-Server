@@ -25,5 +25,5 @@ jobs:
         run: cd ../../srv/workster/Workster-Server/ && git pull https://github.com/MattV-NL/Workster-Server.git
       - name: install node modules
         run: npm i
-      -name: start server
+      - name: start server
         run: cd /src && node start.js
