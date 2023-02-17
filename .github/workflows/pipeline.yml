@@ -17,7 +17,7 @@ jobs:
       - name: create SSH key
         run: echo "${{ secrets.LINODE_SSH_KEY }}" > key.ppk
       - name: login to linode
-        run: ssh -i key.ppk -l cicd ${{ secrets.SERVER_URL }}
+        run: ssh -i key.ppk -l cicd "${{ secrets.SERVER_URL }}"
       - name: kill existing process
         run: pkill node start.js
       - name: clone repo
