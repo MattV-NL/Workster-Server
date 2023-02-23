@@ -15,9 +15,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: create SSH key
-        run: echo "${{ secrets.LINODE_SSH_KEY }}" > key.ppk
+        run: echo "${{ secrets.LINODE_SSH_KEY }}" > key.pem
       - name: login to linode
-        run: ssh ${{ secrets.SERVER_URL }} -T -i key.ppk -l cicd
+        run: ssh ${{ secrets.SERVER_URL }} -T -i key.pem -l cicd
       - name: kill existing process
         run: pkill node start.js
       - name: clone repo
