@@ -11,5 +11,5 @@ Some of the settings the user can manipulate are the units the weather API uses 
 I chose to build this project as I was working throughout the winter outside in the elements. Often we would be caught working out in snow storms and have work inside on days with calmer weather. So I thought that I the person planning the workscope had an easy way to see if there was weather during days when work was to be scheduled outside then perhaps that person could reevaluate the work scope and possibly rescedule the work on another day.
 
 ## Deployment
-I deployed the app myself using a linode VM.
-This project is live at https://workster.app/
+This project was deployed with Linode and was live for several months, due to this being a hobby project I do no feel it nessecary to continue to pay for this deployment.
+If you want to see this app in action please visit https://www.loom.com/share/dbf61781d3634ee6ab5a0cf4a3a7f1a9 where you will find a video demo of the app. Otherwise you can reach out to em at any of the contacts in my profile README.md and I'll gladly get back to you! :)
